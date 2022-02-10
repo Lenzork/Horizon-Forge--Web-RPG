@@ -17,7 +17,7 @@ class Gameserver {
         this.online = false;
     }
 
-    start(){ //Server start Script
+    start(){ //Server start 
         const ServerExpress = require('express');
         const ServerApp = ServerExpress();
         const ServerHttp = require('http');
@@ -61,9 +61,10 @@ server.listen(3000, () => {
   for (let i = 0; i <= config.serverCount; i++) {
     console.log(config.serverNames[i]);
     servers.push(new Gameserver(config.serverNames[i], config.serverSlots[i], config.serverPorts[i]));
+    if(config.startAllServersAtTheBeginning){
+        servers[i].start();
+    }
   }
-  servers[1].start();
-  servers[2].start();
   console.log(servers);
 });
 
