@@ -1,0 +1,8 @@
+{
+    "name": "Horizon Forge: Web RPG",
+    "version": "0.0.1",
+    "description": "Web RPG Game",
+    "dependencies": {
+        "express": "^4.17.2"
+    }
+}
