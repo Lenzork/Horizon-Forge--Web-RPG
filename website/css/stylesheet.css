@@ -1,5 +1,6 @@
 .top hr {
     width: 25%;
+    border-radius: 75%;
 }
 
 .top {
@@ -11,4 +12,42 @@ body {
     font-family: Century Gothic;
     background: rgb(0,0,0);
     background: radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(0,25,31,1) 77%, rgba(0,27,47,1) 100%);
+}
+
+.serverTable th {
+    border: 1px solid rgb(255, 255, 255);
+    border-radius: 15px;
+    background-color: black;
+    width: 50%;
+}
+
+.serverTable td {
+    text-align: center;
+    border: none;
+    transition-duration: 1s;
+    font-size: 20px;
+}
+
+.serverTable {
+    width: 50%;
+    /*border-collapse: collapse;*/
+    border: none;
+    border-radius: 15px;
+}
+
+.down table {
+    display: inline-table;
+    text-align: center;
+}
+
+.down td {
+    display: inline-table;
+    text-align: center;
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
+.down hr {
+    width: 50%;
+    border-radius: 75%;
 }
