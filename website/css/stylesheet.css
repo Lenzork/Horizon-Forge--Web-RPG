@@ -1,0 +1,14 @@
+.top hr {
+    width: 25%;
+}
+
+.top {
+    text-align: center;
+}
+
+body {
+    color: white;
+    font-family: Century Gothic;
+    background: rgb(0,0,0);
+    background: radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(0,25,31,1) 77%, rgba(0,27,47,1) 100%);
+}

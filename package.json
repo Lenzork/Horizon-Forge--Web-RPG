@@ -3,6 +3,10 @@
     "version": "0.0.1",
     "description": "Web RPG Game",
     "dependencies": {
-        "express": "^4.17.2"
-    }
+        "express": "^4.17.2",
+        "socket.io": "^4.4.1"
+    },
+    "scripts": {
+        "start": "server.js"
+      }
 }
