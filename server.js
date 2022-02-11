@@ -38,6 +38,7 @@ class Gameserver {
         ServerServer.listen(this.port, () => {
             console.log("Server " + this.name + " started with port: " + this.port);
         });
+
         this.online = true;
     }
 

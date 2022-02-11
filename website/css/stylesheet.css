@@ -5,6 +5,7 @@
 
 .top {
     text-align: center;
+    padding-bottom: 50px;
 }
 
 body {
@@ -33,6 +34,10 @@ body {
     /*border-collapse: collapse;*/
     border: none;
     border-radius: 15px;
+}
+
+.down {
+    padding-top: 50px;
 }
 
 .down table {
