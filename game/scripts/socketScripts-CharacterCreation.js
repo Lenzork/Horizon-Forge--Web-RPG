@@ -2,10 +2,10 @@ var socket = io();
 var playerConnectedServer;
 
 // Gets the connected Server on the Character creation page
-socket.on("getConnectedServer", (connectedServer, mainServerPort) => {
+socket.on("getConnectedServer", (connectedServer, mainServerPort, clientsCount) => {
     exports.currentServerText.innerHTML = connectedServer.name;
     playerConnectedServer = connectedServer;
-    exports.currentServerUsers.innerHTML = connectedServer.userCount + " / " + connectedServer.slots;
+    exports.currentServerUsers.innerHTML = clientsCount + " / " + connectedServer.slots;
     if(connectedServer.online == false){
         console.error("SERVER IS OFFLINE, REDIRECTING");
         var adresse = new URL("http://localhost:" + mainServerPort);

@@ -34,8 +34,7 @@ class Gameserver {
 
         io.sockets.on('connection', (socket) => {
             console.log('a user connected');
-            io.to(socket.id).emit("getConnectedServer", this);
-            this.increaseUserCount();
+            io.to(socket.id).emit("getConnectedServer", this, config.mainServerPort, io.engine.clientsCount);
             //this.stop(ServerServer);
 
             socket.on('createCharacter', (characterName, characterClass, characterServer) => {
@@ -46,11 +45,10 @@ class Gameserver {
             })
 
             socket.on("receiveServer", () => {
-                io.to(socket.id).emit("getConnectedServer", this, config.mainServerPort);
+                io.to(socket.id).emit("getConnectedServer", this, config.mainServerPort, io.engine.clientsCount);
             })
 
             socket.on('disconnect', () => {
-                this.decreaseUserCount();
             });            
         });
 
