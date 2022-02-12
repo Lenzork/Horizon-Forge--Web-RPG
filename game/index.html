@@ -6,9 +6,43 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/stylesheet.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/scripts/socketScripts-CharacterCreation.js"></script>
     <title>Horizon Forge: Web RPG</title>
 </head>
     <body>
-        
+        <div class="characterCreation">
+            <div class="left-div">
+                <center><h1>Select your Hero!</h1></center>
+                <div class="container">
+                    <div style="color: white;"><center><label for="radio1"><img src="./images/portraits/24.png" height="150" width="150"><p>Warrior</p></label><input type="radio" id="radio1" name="playerClass"></div></center>
+                    <div style="color: white;"><center><label for="radio2"><img src="./images/portraits/23.png" height="150" width="150"><p>Wizard</p></label><input type="radio" id="radio2" name="playerClass"></div></center>
+                    <div style="color: white;"><center><label for="radio3"><img src="./images/portraits/28.png" height="150" width="150"><p>Archer</p></label><input type="radio" id="radio3" name="playerClass"></div></center>
+                </div>
+            </div>
+            <div class="middle-div">
+                <div class="middle-div-characterNameTop">
+                    <center>
+                        <h1 id="characterNameTop" onchange="myFunction();">{ERROR}</h1>
+                    </center>
+                </div>
+                <div class="middle-div-characterPicture">
+                    <center>
+                        <img id="characterPicture" src="" height="500" width="500">
+                    </center>
+                </div>
+                <div class="middle-div-characterName">
+                    <center>
+                        <input type="text" class="characterNameInput" id="characterNameInput" placeholder="Enter character name..." maxlength="18"><br><br>
+                        <button>Create Character</button>
+                    </center>
+                </div>
+            </div>
+            <div class="right-div">
+                <p>This is a Text</p>
+            </div>
+        </div>
     </body>
+    <script src="/scripts/clientside.js"></script>
 </html>
