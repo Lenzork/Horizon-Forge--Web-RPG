@@ -7,53 +7,66 @@ written on 12/02/2022
 
 
 */
-
 //----------------------------------------------------------------
 // Declaration of elements
 //----------------------------------------------------------------
-allElements = {}
 
-allElements.characterNameText = document.getElementById("characterNameTop");
-allElements.characterNameInput = document.getElementById("characterNameInput");
-allElements.characterPicture = document.getElementById("characterPicture");
-allElements.classWarriorRadioButton = document.getElementById("radio1");
-allElements.classWizardRadioButton = document.getElementById("radio2");
-allElements.classArcherRadioButton = document.getElementById("radio3");
+//Player creation elements
+characterNameText = document.getElementById("characterNameTop");
+characterNameInput = document.getElementById("characterNameInput");
+characterPicture = document.getElementById("characterPicture");
+characterCreateButton = document.getElementById("characterCreationButton");
+
+//Player classes radio Buttons
+classWarriorRadioButton = document.getElementById("radio1");
+classWizardRadioButton = document.getElementById("radio2");
+classArcherRadioButton = document.getElementById("radio3");
+
+//Server connection Informations
+currentServerText = document.getElementById("serverConnection");
+currentServerUsers = document.getElementById("serverUsers");
 
 //----------------------------------------------------------------
 // Functions
 //----------------------------------------------------------------
-allElements.characterNameInput.onkeydown, allElements.characterNameInput.onkeyup = () => {
-    allElements.characterNameText.innerHTML = allElements.characterNameInput.value;
+characterNameInput.onkeydown, characterNameInput.onkeyup = () => {
+    characterNameText.innerHTML = characterNameInput.value;
 }
 
-allElements.classArcherRadioButton.oninput = () => {
+classArcherRadioButton.oninput = () => {
     console.log("Works!");
-    if(allElements.classArcherRadioButton.checked){
-        allElements.characterPicture.src = "../images/portraits/28.png";
+    if(classArcherRadioButton.checked){
+        characterPicture.src = "../images/portraits/28.png";
     }
 }
 
-allElements.classWarriorRadioButton.oninput = () => {
+classWarriorRadioButton.oninput = () => {
     console.log("Works!");
-    if(allElements.classWarriorRadioButton.checked){
-        allElements.characterPicture.src = "../images/portraits/24.png";
+    if(classWarriorRadioButton.checked){
+        characterPicture.src = "../images/portraits/24.png";
     }
 }
 
-allElements.classWizardRadioButton.oninput = () => {
+classWizardRadioButton.oninput = () => {
     console.log("Works!");
-    if(allElements.classWizardRadioButton.checked){
-        allElements.characterPicture.src = "../images/portraits/23.png";
+    if(classWizardRadioButton.checked){
+        characterPicture.src = "../images/portraits/23.png";
     }
 }
 
 //----------------------------------------------------------------
 // Setting init values
 //----------------------------------------------------------------
-allElements.characterNameText.innerHTML = null; //Setting the CharacterNameText to no Text -> If this does not launch then the Text will be {ERROR}.
+characterNameText.innerHTML = null; // Setting the CharacterNameText to no Text -> If this does not launch then the Text will be {ERROR}.
+classWarriorRadioButton.checked = true; // Set the Warrior as default selection.
+characterPicture.src = "../images/portraits/24.png"; // Set the Warrior portrait as default.
 
 //----------------------------------------------------------------
 // Clientside script load text
 //----------------------------------------------------------------
 console.log("Character creation %c clientside Script %c has been %c sucessfully %c loaded", "color: yellow;", "color: none;", "color: green;", "color: none;");
+
+//----------------------------------------------------------------
+// Exports
+//----------------------------------------------------------------
+exports = {characterNameText, characterNameInput, characterPicture, classWarriorRadioButton, classWizardRadioButton, classArcherRadioButton, currentServerText, currentServerUsers};

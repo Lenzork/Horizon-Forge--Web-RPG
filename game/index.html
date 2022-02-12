@@ -7,8 +7,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/stylesheet.css">
+    <script>var exports = {};</script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/scripts/socketScripts-CharacterCreation.js"></script>
+    <script type="module" src="/scripts/socketScripts-CharacterCreation.js"></script>
     <title>Horizon Forge: Web RPG</title>
 </head>
     <body>
@@ -20,6 +21,7 @@
                     <div style="color: white;"><center><label for="radio2"><img src="./images/portraits/23.png" height="150" width="150"><p>Wizard</p></label><input type="radio" id="radio2" name="playerClass"></div></center>
                     <div style="color: white;"><center><label for="radio3"><img src="./images/portraits/28.png" height="150" width="150"><p>Archer</p></label><input type="radio" id="radio3" name="playerClass"></div></center>
                 </div>
+                <center><h2 style="color: white;">More classes coming soon..</h2></center>
             </div>
             <div class="middle-div">
                 <div class="middle-div-characterNameTop">
@@ -35,12 +37,12 @@
                 <div class="middle-div-characterName">
                     <center>
                         <input type="text" class="characterNameInput" id="characterNameInput" placeholder="Enter character name..." maxlength="18"><br><br>
-                        <button>Create Character</button>
+                        <button id="characterCreationButton">Create Character</button>
                     </center>
                 </div>
             </div>
             <div class="right-div">
-                <p>This is a Text</p>
+                <center><h1>Server Informations</h1><br><h2 id="serverConnection">Connected to: {UNKNOWN}</h2><br><h2 id="serverUsers">Users: 0/100</h2></center>
             </div>
         </div>
     </body>

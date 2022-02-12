@@ -12,6 +12,7 @@ class Gameserver {
     constructor(name, slots, port) {
         this.id = servers.length;
         this.name = name;
+        this.userCount = 0;
         this.slots = slots;
         this.port = port;
         this.online = false;
@@ -31,8 +32,26 @@ class Gameserver {
             res.sendFile(__dirname + '/index.html');
         });
 
-        io.on('connection', (socket) => {
+        io.sockets.on('connection', (socket) => {
             console.log('a user connected');
+            io.to(socket.id).emit("getConnectedServer", this);
+            this.increaseUserCount();
+            //this.stop(ServerServer);
+
+            socket.on('createCharacter', (characterName, characterClass, characterServer) => {
+                console.log(socket.id + " wants to create a character");
+                console.log("Character name: " + characterName);
+                console.log("Character Class: " + characterClass);
+                console.log("On Server: " + characterServer);
+            })
+
+            socket.on("receiveServer", () => {
+                io.to(socket.id).emit("getConnectedServer", this, config.mainServerPort);
+            })
+
+            socket.on('disconnect', () => {
+                this.decreaseUserCount();
+            });            
         });
 
         ServerServer.listen(this.port, () => {
@@ -40,10 +59,20 @@ class Gameserver {
         });
 
         this.online = true;
+        
     }
 
-    stop(){ //Server stop Script
+    stop(server){ //Server stop Script
+        server.close();
+        this.online = false;
+    }
 
+    increaseUserCount(){
+        this.userCount++;
+    }
+
+    decreaseUserCount(){
+        this.userCount--;
     }
 
     isServerOnline(){ //Get server status
@@ -57,7 +86,7 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
-server.listen(3000, () => {
+server.listen(config.mainServerPort, () => {
   console.log('The Servers will be started...');
   for (let i = 0; i <= config.serverCount; i++) {
     console.log(config.serverNames[i]);

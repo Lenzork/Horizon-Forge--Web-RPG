@@ -3,6 +3,7 @@ var config = {};
 // ----------------------------------------------------------------
 //                          SERVER CONFIG
 // ----------------------------------------------------------------
+config.mainServerPort = 3000;
 config.serverCount = 4;
 config.serverNames = ["Antropa", "Sinesta", "Landro", "Valis", "Valhalla"];
 config.serverPorts = [8888, 8889, 8890, 8891, 8892];
