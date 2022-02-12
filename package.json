@@ -4,13 +4,14 @@
     "description": "Web RPG Game",
     "dependencies": {
         "express": "^4.17.2",
+        "mysql": "^2.18.1",
         "socket.io": "^4.4.1"
     },
     "scripts": {
         "start": "server.js"
     },
-    "compilerOptions": {     
+    "compilerOptions": {
         "module": "es6",
         "target": "es5"
-      }
+    }
 }

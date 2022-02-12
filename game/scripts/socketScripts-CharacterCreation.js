@@ -1,8 +1,9 @@
 var socket = io();
 var playerConnectedServer;
+var blacklistNames = [];
 
 // Gets the connected Server on the Character creation page
-socket.on("getConnectedServer", (connectedServer, mainServerPort, clientsCount) => {
+socket.on("getConnectedServer", (connectedServer, mainServerPort, clientsCount, blacklistedNames) => {
     exports.currentServerText.innerHTML = connectedServer.name;
     playerConnectedServer = connectedServer;
     exports.currentServerUsers.innerHTML = clientsCount + " / " + connectedServer.slots;
@@ -11,7 +12,7 @@ socket.on("getConnectedServer", (connectedServer, mainServerPort, clientsCount) 
         var adresse = new URL("http://localhost:" + mainServerPort);
         window.location.replace(adresse);
     }
-    connectedServer.online = false;
+    blacklistNames = blacklistedNames;
 })
 
 setInterval(() => {
@@ -25,6 +26,7 @@ characterCreateButton.addEventListener("click", function() {
     var characterName = null;
     var characterClass = null;
     var characterServer = null;
+    var blacklistedNameDetected = false;
 
     // Character name
     // Check for length
@@ -56,7 +58,16 @@ characterCreateButton.addEventListener("click", function() {
 
     characterServer = playerConnectedServer;
 
-    if((exports.characterNameInput.value.length <= 18 && exports.characterNameInput.value.length >= 4) && characterClass && characterServer){
+    // Check for Blacklisted Names
+    blacklistNames.forEach((name) => {
+            if(exports.characterNameInput.value.toLowerCase().includes(name)){
+                console.log("Blacklisted name detected: " + name);
+                blacklistedNameDetected = true;
+                return;
+            }
+    })
+    
+    if((exports.characterNameInput.value.length <= 18 && exports.characterNameInput.value.length >= 4) && characterClass && characterServer && !blacklistedNameDetected){
         socket.emit("createCharacter", characterName, characterClass, characterServer.name);
     } else {
         alert("Character could not be created! Please select a class and enter a valid name!");

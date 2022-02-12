@@ -15,16 +15,20 @@ class Gameserver {
         this.userCount = 0;
         this.slots = slots;
         this.port = port;
+        this.blacklistedNames = [];
         this.online = false;
     }
 
-    start(){ //Server start 
+    start(mysqlServer, mysqlUser, mysqlPassword, mysqlDatabaseName){ //Server start
         const ServerExpress = require('express');
         const ServerApp = ServerExpress();
         const ServerHttp = require('http');
         const ServerServer = ServerHttp.createServer(ServerApp);
         const { Server } = require("socket.io");
         const io = new Server(ServerServer);
+        var mysql = require('mysql');
+
+        var gameserver = this;
 
         ServerApp.use(ServerExpress.static(__dirname + '/game'));
 
@@ -32,10 +36,26 @@ class Gameserver {
             res.sendFile(__dirname + '/index.html');
         });
 
+        var con = mysql.createConnection({
+            host: mysqlServer,
+            user: mysqlUser,
+            password: mysqlPassword,
+            database: mysqlDatabaseName
+        });
+
+        //Get blacklisted names from Database
+        con.connect(function(err) {
+            if (err) throw err;
+            con.query("SELECT * FROM blacklisted_names", function (err, result, fields) {
+              if (err) throw err;
+              result.forEach((entry) => {gameserver.addBlacklistedName(entry.name);})
+            });
+        });
         io.sockets.on('connection', (socket) => {
             console.log('a user connected');
-            io.to(socket.id).emit("getConnectedServer", this, config.mainServerPort, io.engine.clientsCount);
-            //this.stop(ServerServer);
+
+            io.to(socket.id).emit("getConnectedServer", this, config.mainServerPort, io.engine.clientsCount, this.blacklistedNames);
+            //this.stop(ServerServer);  <--Stop the Server
 
             socket.on('createCharacter', (characterName, characterClass, characterServer) => {
                 console.log(socket.id + " wants to create a character");
@@ -45,7 +65,7 @@ class Gameserver {
             })
 
             socket.on("receiveServer", () => {
-                io.to(socket.id).emit("getConnectedServer", this, config.mainServerPort, io.engine.clientsCount);
+                io.to(socket.id).emit("getConnectedServer", this, config.mainServerPort, io.engine.clientsCount, this.blacklistedNames);
             })
 
             socket.on('disconnect', () => {
@@ -60,8 +80,12 @@ class Gameserver {
         
     }
 
-    stop(server){ //Server stop Script
-        server.close();
+    addBlacklistedName(name){
+        this.blacklistedNames.push(name);
+    }
+
+    stop(givenServer){ //Server stop Script
+        givenServer.close();
         this.online = false;
     }
 
@@ -90,7 +114,7 @@ server.listen(config.mainServerPort, () => {
     console.log(config.serverNames[i]);
     servers.push(new Gameserver(config.serverNames[i], config.serverSlots[i], config.serverPorts[i]));
     if(config.startAllServersAtTheBeginning){
-        servers[i].start();
+        servers[i].start(config.mysqlServerAdress[i], config.mysqlUser[i], config.mysqlPassword[i], config.mysqlDatabaseName[i]);
     }
   }
   console.log(servers);
