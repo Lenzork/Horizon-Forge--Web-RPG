@@ -1,0 +1,181 @@
+.left-div {
+    height: 100%;
+    width: 33%;
+    background-color: black;
+    background-image: url("../images/textures/bricks/Bricks_16-512x512.png");
+    margin: 0;
+    padding-left: 15px;
+    box-shadow: 0 0 5px 5px rgb(43, 43, 43);
+}
+
+.Banner {
+    width: 95%;
+    background-image: url("../images/textures/tile/headline-background.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 93px;
+    box-shadow: 0 0 5px 5px rgba(43, 43, 43, 0.5);
+}
+
+.SmallerBanner {
+    width: 95%;
+    background-image: url("../images/textures/tile/headline-background.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 82px;
+    box-shadow: 0 0 5px 5px rgba(43, 43, 43, 0.5);
+}
+
+.left-div h1 {
+    /*border: 10px solid transparent;*/
+    /*border-radius: 15px;*/
+    color: white;
+    width:95%;
+    /*background-color: white;*/
+    /*border-image: url("../images/textures/tile/headline-background.png") 30 30 round;*/
+    transform: translateY(25px);
+
+}
+
+.right-div h1 {
+    /*border: 10px solid transparent;*/
+    /*border-radius: 15px;*/
+    color: white;
+    width:95%;
+    /*background-color: white;*/
+    /*border-image: url("../images/textures/tile/headline-background.png") 30 30 round;*/
+    transform: translateY(25px);
+
+}
+
+.middle-div {
+    height: 100%;
+    width: 60%;
+    background-color: rgba(136, 136, 136, 0);
+    margin: 0;
+}
+
+.middle-div hr {
+    position:absolute;
+    margin: auto;
+}
+
+.middle-div-characterNameTop {
+    position:absolute;
+    margin: auto;
+    top: 0;
+    left: 0;
+    right: 0;
+    
+}
+
+.middle-div-characterName {
+    position:absolute;
+    margin: auto;
+
+    height: 13%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    
+}
+
+.middle-div-characterName input {
+    border: 2px solid rgb(0, 0, 0);
+    border-radius: 25px;
+    font-size: 25px;
+    text-align: center;
+    transition-duration: 0.5s;
+    width: 25%;
+}
+
+.middle-div-characterPicture {
+    position:absolute;
+    margin: auto;
+    height: 13%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    width: 30%;
+    transform: translateY(-270px);
+    
+}
+
+.middle-div-characterPicture img {
+    border: 3px solid black;
+    border-radius: 15px;
+    box-shadow: 0 0 5px 5px rgba(43, 43, 43, 0.5);
+}
+
+.middle-div-characterName input:focus {
+    border: 2px solid rgb(0, 0, 0);
+    border-radius: 25px;
+    font-size: 30px;
+    box-shadow: 0 0 1em rgb(223, 194, 30);
+    text-align: center;
+    width: 25%;
+    transition-duration: 0.5s;
+}
+
+.middle-div-characterName button {
+    border: 2px solid rgb(0, 0, 0);
+    font-size: 30px;
+    text-align: center;
+    width: 25%;
+    transition-duration: 0.5s;
+}
+
+.right-div {
+    height: 100%;
+    width: 33%;
+    background-color: black;
+    background-image: url("../images/textures/bricks/Bricks_16-512x512.png");
+    /*background-image: url("../images/textures/tile/background-banner.png");*/
+    background-repeat: no-repeat;
+    background-size: cover;
+    margin: 0;
+    padding-right: 15px;
+    box-shadow: 0 0 5px 5px rgb(43, 43, 43);
+    color: white;
+}
+
+.characterCreation {
+    display: flex;
+    justify-content: center;
+    flex-direction:row;
+    height: 100%;
+}
+
+body {
+    margin:0;
+    height: 100%;
+    font-family: Century Gothic;
+    /*background-image: url("../images/backgrounds/game_background_4.png");*/
+    background-image: url("../images/textures/bricks/Bricks_23-512x512.png");
+    background-position: center top;
+}
+
+.container {
+    padding: 25px;
+    height: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr /*1fr 1fr*/;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+      ". . ."
+      ". . ."
+      /*". . ."*/;
+  }
+
+.container img {
+    margin: 5px;
+    box-shadow: 0 0 5px 5px rgba(43, 43, 43, 0.5);
+}
+  
+
+html {
+    height: 100%;
+}

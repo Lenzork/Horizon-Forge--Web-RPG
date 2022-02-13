@@ -29,11 +29,30 @@ body {
     font-size: 20px;
 }
 
+.serverTable button{
+    border: 1px solid white;
+    border-radius: 15px;
+    background-color: transparent;
+    color: white;
+    width: 50%;
+    transition-duration: 0.5s;
+}
+
+.serverTable button:hover{
+    border: 1px solid white;
+    border-radius: 15px;
+    background-color: rgba(145, 145, 145, 0.5);
+    color: white;
+    width: 50%;
+    transition-duration: 0.5s;
+}
+
 .serverTable {
     width: 50%;
     /*border-collapse: collapse;*/
     border: none;
     border-radius: 15px;
+    table-layout: fixed;
 }
 
 .down {
