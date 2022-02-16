@@ -1,6 +1,12 @@
-var socket = io();
+var socket = io.connect();
 var playerConnectedServer;
 var blacklistNames = [];
+
+// Let the client join character creation for a more specific communication with the Server.
+socket.emit("create", "characterCreation");
+socket.emit("receiveServer");
+socket.on("RoomsVerification", (param) => {console.log(param)});
+
 
 // Gets the connected Server on the Character creation page
 socket.on("getConnectedServer", (connectedServer, mainServerPort, clientsCount, blacklistedNames) => {

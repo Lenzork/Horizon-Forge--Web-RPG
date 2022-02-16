@@ -5,11 +5,29 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Horizon Forge: Web RPG => Game</title>
-    <link rel="stylesheet" href="../css/stylesheet.css">
+    <link rel="stylesheet" href="css/ingame-stylesheet.css">
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/scripts/socketScripts-game.js"></script>
+    <script src="scripts/socketScripts.js"></script>
 </head>
 <body>
-    <p id="ResponseText"></p>
+    <div class="left-div">
+        <center>
+        <div class="parent">
+            
+            <div class="div1"><h1>Home</h1></div>
+            <div class="div2"><h1>Marketplace</h1></div>
+            <div class="div3"><h1>PVP</h1></div>
+            <div class="div4"><h1>Missions</h1></div>
+            <div class="div5"><h1>Options</h1></div>
+        </div>
+        <div class="version-text">ALPHA VERSION</div>
+        </center>
+    </div>
+    <div class="middle-div">
+        <center>
+        <h1 id="characterName"></h1>
+        <br>
+        <img id="characterPortrait">
+    </center></div>
 </body>
 </html>

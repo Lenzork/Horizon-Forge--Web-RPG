@@ -77,10 +77,14 @@ class Gameserver {
             });
         });
 
-        io.of("/").on('connection', (socket) => {
+        io.sockets.on('connection', (socket) => {
             console.log('a user connected');
 
-            io.to(socket.id).emit("getConnectedServer", this, config.mainServerPort, io.engine.clientsCount, this.blacklistedNames);
+            socket.on('create', function(room) {
+                socket.join(room);
+                io.sockets.in(room).emit('RoomsVerification', 'You are in ' + room);
+            });
+
             //this.stop(ServerServer);  <--Stop the Server
 
             socket.on('createCharacter', (characterName, characterClass, characterServer) => {
@@ -148,6 +152,26 @@ class Gameserver {
                 // Output username
                 console.log("true");
                 response.render(__dirname + "/game/game/index.html");
+
+                let username = request.session.username;
+
+                io.sockets.on('connection', (socket) => {
+
+                    socket.on("joinedGame", () => {
+                        socket.join("ingame");
+
+                        // Getting character information
+                        con.query("SELECT * FROM characters WHERE name = ?", username, function(error, results, fields) {
+                            if (error) throw error;
+                            console.log(results)
+                            io.to(socket.id).emit("loginVerification", results[0].name, results[0].portrait);
+                            socket.leave("characterCreation");
+                            console.log(socket.id + " is now ingame with " + results[0].name);
+                            io.sockets.in("ingame").emit('RoomsVerification', 'You are ingame');
+                        })
+                    })
+                    
+                });
             } else {
                 // Not logged in
                 response.redirect('../');
