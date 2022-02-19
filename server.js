@@ -77,6 +77,7 @@ class Gameserver {
             });
         });
 
+        // Socket io Connection
         io.sockets.on('connection', (socket) => {
             console.log('a user connected');
 
@@ -96,6 +97,75 @@ class Gameserver {
 
             socket.on("receiveServer", () => {
                 io.to(socket.id).emit("getConnectedServer", this, config.mainServerPort, io.engine.clientsCount, this.blacklistedNames);
+            })
+
+            socket.on("joinedGame", () => {
+                socket.join("ingame");
+
+                var itemRarities = [];
+
+                con.query('SELECT * FROM itemtypes', function(error, results, fields) {
+                    if (error) throw error;
+
+                    for (var i = 0; i < results.length; i++){
+                        itemRarities.push(results[i].name);
+                    }
+                })
+
+                // Getting character information
+                con.query("SELECT * FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results)
+                    io.to(socket.id).emit("loginVerification", results[0].id, results[0].name, results[0].portrait, results[0].attackpower, results[0].health, results[0].defense, itemRarities);
+                    socket.dbID = results[0].id;
+                    socket.leave("characterCreation");
+                    console.log(socket.id + " is now ingame with " + results[0].name);
+                    io.sockets.in("ingame").emit('RoomsVerification', 'You are ingame');
+                })
+            })
+
+            socket.on("fetchItems", () => { // HIER ALS LETZTES STEHENGEBLIEBEN 18.02.2022 -> Die Items wurden immer weiter *2 genommen auf der Charakter Seite und dann sind da irgendwann tausende Objekte
+
+                con.query('SELECT * FROM characters_inventorys WHERE characterid = ?', socket.dbID, function(error, results1, fields) {
+                    if (error) throw error;
+                    var itemIDs = [];
+                    
+                    if(results1.length > 0){
+                        console.log(results1);
+                        
+                        for (var i = 0; i < results1.length; i++){
+                            itemIDs.push(results1[i].itemid);
+                        }
+                        
+                        //var items = [];
+                        itemIDs.forEach(itemid => {
+                            
+                            
+                            con.query("SELECT * FROM items WHERE id = ?", itemid, function(error, results, fields) {
+                                if (error) throw error;
+                                var item;
+                                //item = new Item(results[0].name, results[0].type, results[0].description, results[0].sellprice, results[0].buyprice, results[0].soulbound, results[0].isWeapon, results[0].damage, results[0].requiredlevel, results[0].icon, results[0].rarity);
+                                io.to(socket.id).emit("receiveItem", results[0].name, results[0].type, results[0].description, results[0].sellprice, results[0].buyprice, results[0].soulbound, results[0].isWeapon, results[0].damage, results[0].requiredlevel, results[0].icon, results[0].rarity);
+                                console.log(item);
+                                //items.push(item);
+                                
+                            })
+                            
+                            
+                            
+                        });
+
+                        io.to(socket.id).emit("createInventory");
+                        
+                        //io.to(socket.id).emit("receiveItems", items);
+                        
+                        
+                        
+                    } else {
+                        console.log("No items found for " + socket.id);
+                    }
+                    
+                })
             })
 
             socket.on('disconnect', () => {
@@ -154,22 +224,10 @@ class Gameserver {
                 response.render(__dirname + "/game/game/index.html");
 
                 let username = request.session.username;
+                
 
                 io.sockets.on('connection', (socket) => {
-
-                    socket.on("joinedGame", () => {
-                        socket.join("ingame");
-
-                        // Getting character information
-                        con.query("SELECT * FROM characters WHERE name = ?", username, function(error, results, fields) {
-                            if (error) throw error;
-                            console.log(results)
-                            io.to(socket.id).emit("loginVerification", results[0].name, results[0].portrait);
-                            socket.leave("characterCreation");
-                            console.log(socket.id + " is now ingame with " + results[0].name);
-                            io.sockets.in("ingame").emit('RoomsVerification', 'You are ingame');
-                        })
-                    })
+                    socket.username = username;
                     
                 });
             } else {
