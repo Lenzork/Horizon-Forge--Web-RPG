@@ -161,9 +161,14 @@ body hr {
     width: 95%;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(5, 1fr);
+    grid-template-rows: repeat(5, minmax(175px, 3fr));
     grid-column-gap: 10px;
     grid-row-gap: 10px;
+}
+
+.inventoryGrid div {
+    height: 100%;
+    width: 100%;
 }
 
 .inventory-item {
@@ -232,3 +237,19 @@ html {
     
 .modal-item-information-grid-content-1 { grid-area: 1 / 1 / 2 / 2; }
 .modal-item-information-grid-content-2 { grid-area: 1 / 1 / 3 / 4; }
+
+.character-equipment {
+    display: grid;
+    width: 75%;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+    grid-column-gap: 5px;
+    grid-row-gap: 0px;
+}
+    
+.character-equipment div { 
+    width: 100%;
+    height: 150px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid white;
+}

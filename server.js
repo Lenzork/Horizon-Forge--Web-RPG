@@ -89,7 +89,7 @@ class Gameserver {
 
             //this.stop(ServerServer);  <--Stop the Server
 
-            socket.on('createCharacter', (characterName, characterClass, characterServer, characterPicture) => {
+            socket.on('createCharacter', (characterName, characterCode, characterClass, characterServer, characterPicture) => {
                 var canCreate = false;
 
                 function getCanCreate(){
@@ -126,16 +126,24 @@ class Gameserver {
                     if(characterClass == "Archer"){
                         characterPortrait = "28.png";
                     }
+                    bcrypt.genSalt(10, function(err, salt) {  
+                        bcrypt.hash(characterCode, salt, (err, hash) => {
+                            if (err) {
+                            throw err;
+                            }
+                            
+                            con.query('SELECT id FROM characters ORDER BY id DESC LIMIT 1;', function(error, results, fields) {
+                                if (error) throw error;
+                                console.log(results[0].id);
+                            
+                            con.query('INSERT INTO `characters` (`id`, `name`, `code`, `level`, `portrait`, `class`, `attackpower`, `health`, `defense`, `pvpcr`) VALUES (?, ?, ?, 1, ?, ?, 100, 100, 100, 0);', [results[0].id + 1, characterName, hash, characterPortrait, characterClass], function(error2, results2, fields2) {
+                                if (error2) throw error2;
+                                console.log("Created new character!");
+                            })
+                            })
+                        });
+                    });
 
-                    con.query('SELECT id FROM characters ORDER BY id DESC LIMIT 1;', function(error, results, fields) {
-                        if (error) throw error;
-                        console.log(results[0].id);
-                    
-                    con.query('INSERT INTO `characters` (`id`, `name`, `code`, `level`, `portrait`, `class`, `attackpower`, `health`, `defense`, `pvpcr`) VALUES (?, ?, ?, 1, ?, ?, 100, 100, 100, 0);', [results[0].id + 1, characterName, "defaultPassword", characterPortrait, characterClass], function(error2, results2, fields2) {
-                        if (error2) throw error2;
-                        console.log("Created new character!");
-                    })
-                    })
                     io.to(socket.id).emit("sendAlert", "Character has been created successfully!");
                 } else {
                     io.to(socket.id).emit("sendAlert", "A Character with that Name already exists");
@@ -193,6 +201,195 @@ class Gameserver {
                 })
             })
 
+            /* EQUIPMENT SOCKETS */
+            /* HELMET */
+            socket.on("equip_head", (itemid) => {
+                con.query("SELECT id FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results[0].id);
+                    console.log(results[0].id + " " + itemid);
+                    con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
+                        if (error) throw error;
+                        console.log(results2.length);
+                        if(results2.length > 0){
+                            console.log(socket.username + " equipped an helmet with the id " + itemid);
+                            con.query("UPDATE characters SET equipped_head = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
+                                if (error) throw error;
+                            });
+                        }
+                    })
+                })
+            })
+            socket.on("unequip_head", (itemid) => {
+                con.query("SELECT id FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results[0].id);
+                    console.log(results[0].id + " " + itemid);
+                    con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
+                        if (error) throw error;
+                        console.log(results2.length);
+                        if(results2.length > 0){
+                            console.log(socket.username + " unequipped an helmet with the id " + itemid);
+                            con.query("UPDATE characters SET equipped_head = ? WHERE id = ?", [-1, results[0].id], function(error, results, fields) {
+                                if (error) throw error;
+                            });
+                        }
+                    })
+                })
+            })
+
+            /* CHEST */
+            socket.on("equip_chest", (itemid) => {
+                con.query("SELECT id FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results[0].id);
+                    console.log(results[0].id + " " + itemid);
+                    con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
+                        if (error) throw error;
+                        console.log(results2.length);
+                        if(results2.length > 0){
+                            console.log(socket.username + " equipped an chest with the id " + itemid);
+                            con.query("UPDATE characters SET equipped_chest = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
+                                if (error) throw error;
+                            });
+                        }
+                    })
+                })
+            })
+            socket.on("unequip_chest", (itemid) => {
+                con.query("SELECT id FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results[0].id);
+                    console.log(results[0].id + " " + itemid);
+                    con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
+                        if (error) throw error;
+                        console.log(results2.length);
+                        if(results2.length > 0){
+                            console.log(socket.username + " unequipped an chest with the id " + itemid);
+                            con.query("UPDATE characters SET equipped_chest = ? WHERE id = ?", [-1, results[0].id], function(error, results, fields) {
+                                if (error) throw error;
+                            });
+                        }
+                    })
+                })
+            })
+
+            /* Leg */
+            socket.on("equip_leg", (itemid) => {
+                con.query("SELECT id FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results[0].id);
+                    console.log(results[0].id + " " + itemid);
+                    con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
+                        if (error) throw error;
+                        console.log(results2.length);
+                        if(results2.length > 0){
+                            console.log(socket.username + " equipped an leg with the id " + itemid);
+                            con.query("UPDATE characters SET equipped_leg = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
+                                if (error) throw error;
+                            });
+                        }
+                    })
+                })
+            })
+            socket.on("unequip_leg", (itemid) => {
+                con.query("SELECT id FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results[0].id);
+                    console.log(results[0].id + " " + itemid);
+                    con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
+                        if (error) throw error;
+                        console.log(results2.length);
+                        if(results2.length > 0){
+                            console.log(socket.username + " unequipped an leg with the id " + itemid);
+                            con.query("UPDATE characters SET equipped_leg = ? WHERE id = ?", [-1, results[0].id], function(error, results, fields) {
+                                if (error) throw error;
+                            });
+                        }
+                    })
+                })
+            })
+
+            /* Hand */
+            socket.on("equip_hand", (itemid) => {
+                con.query("SELECT id FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results[0].id);
+                    console.log(results[0].id + " " + itemid);
+                    con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
+                        if (error) throw error;
+                        console.log(results2.length);
+                        if(results2.length > 0){
+                            console.log(socket.username + " equipped an hand with the id " + itemid);
+                            con.query("UPDATE characters SET equipped_hand = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
+                                if (error) throw error;
+                            });
+                        }
+                    })
+                })
+            })
+            socket.on("unequip_hand", (itemid) => {
+                con.query("SELECT id FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results[0].id);
+                    console.log(results[0].id + " " + itemid);
+                    con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
+                        if (error) throw error;
+                        console.log(results2.length);
+                        if(results2.length > 0){
+                            console.log(socket.username + " unequipped an hand with the id " + itemid);
+                            con.query("UPDATE characters SET equipped_hand = ? WHERE id = ?", [-1, results[0].id], function(error, results, fields) {
+                                if (error) throw error;
+                            });
+                        }
+                    })
+                })
+            })
+
+            /* Boot */
+            socket.on("equip_boot", (itemid) => {
+                con.query("SELECT id FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results[0].id);
+                    console.log(results[0].id + " " + itemid);
+                    con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
+                        if (error) throw error;
+                        console.log(results2.length);
+                        if(results2.length > 0){
+                            console.log(socket.username + " equipped an boot with the id " + itemid);
+                            con.query("UPDATE characters SET equipped_boot = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
+                                if (error) throw error;
+                            });
+                        }
+                    })
+                })
+            })
+            socket.on("unequip_boot", (itemid) => {
+                con.query("SELECT type FROM items WHERE id = ?", itemid, function(error, results, fields){
+                    if(error) throw error;
+                    if(results[0].type == 4){
+                    con.query("SELECT id FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
+                        if (error) throw error;
+                        console.log(results[0].id);
+                        console.log(results[0].id + " " + itemid);
+                        con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
+                            if (error) throw error;
+                            console.log(results2.length);
+                            if(results2.length > 0){
+                                console.log(socket.username + " unequipped an boot with the id " + itemid);
+                                con.query("UPDATE characters SET equipped_boot = ? WHERE id = ?", [-1, results[0].id], function(error, results, fields) {
+                                    if (error) throw error;
+                                });
+                            }
+                        })
+                    })
+                    }
+                });
+            })
+
+            /* END OF EQUIPS */
+
+
             socket.on("fetchItems", () => { // HIER ALS LETZTES STEHENGEBLIEBEN 18.02.2022 -> Die Items wurden immer weiter *2 genommen auf der Charakter Seite und dann sind da irgendwann tausende Objekte
 
                 console.log(socket.dbID);
@@ -216,7 +413,7 @@ class Gameserver {
                                 if (error) throw error;
                                 var item;
                                 //item = new Item(results[0].name, results[0].type, results[0].description, results[0].sellprice, results[0].buyprice, results[0].soulbound, results[0].isWeapon, results[0].damage, results[0].requiredlevel, results[0].icon, results[0].rarity);
-                                io.to(socket.id).emit("receiveItem", results[0].name, results[0].type, results[0].description, results[0].sellprice, results[0].buyprice, results[0].soulbound, results[0].isWeapon, results[0].damage, results[0].requiredlevel, results[0].icon, results[0].rarity);
+                                io.to(socket.id).emit("receiveItem", results[0].id, results[0].name, results[0].type, results[0].description, results[0].sellprice, results[0].buyprice, results[0].soulbound, results[0].isWeapon, results[0].damage, results[0].requiredlevel, results[0].icon, results[0].rarity);
                                 console.log(item);
                                 //items.push(item);
                                 
@@ -256,35 +453,43 @@ class Gameserver {
             let username = request.body.username;
             let password = request.body.password;
 
-            bcrypt.hash(password, 10, (err, hash) => {
-                if (err) {
-                throw err;
-                }
-                password = hash;
-                console.log('Your hash: ', password);
-            });
-            // Ensure the input fields exists and are not empty
-            if (username && password) {
+            // statement to query the user’s password
+            var statement = "select code from characters where name = ?";
+            var values = [username]; // query values
+
+            // function to log in
+            function hasAccess(result){
+            if (result) {
+                // insert login code here
+                console.log("Access Granted!");
+                                            
                 // Execute SQL query that'll select the account from the database based on the specified username and password
-                con.query('SELECT * FROM characters WHERE name = ? AND code = ?', [username, password], function(error, results, fields) {
-                    // If there is an issue with the query, output the error
-                    if (error) throw error;
-                    // If the account exists
-                    if (results.length > 0) {
-                        // Authenticate the user
-                        request.session.loggedin = true;
-                        request.session.username = username;
-                        // Redirect to home page
-                        response.redirect('/game');
-                    } else {
-                        response.send('Incorrect Username and/or Password!');
-                    }			
-                    response.end();
-                });
-            } else {
-                response.send('Please enter Username and Password!');
+                // Authenticate the user
+                request.session.loggedin = true;
+                request.session.username = username;
+                // Redirect to home page
+                response.redirect('/game');		
                 response.end();
             }
+            else {
+                // insert access denied code here
+                console.log("Access Denied!");
+                response.send('Incorrect Username and/or Password!');
+            }
+            }
+
+            // query database for user's password
+            con.query(statement, values, function(err, res) {
+            if (err) throw err;
+            else {
+                var hash = res[0].code;
+                // compare hash and password
+                bcrypt.compare(password, hash, function(err, result) {
+                // execute code to test for access and login
+                hasAccess(result);
+                });
+            }
+            });
         });
 
         ServerApp.get('/game', function(request, response) {

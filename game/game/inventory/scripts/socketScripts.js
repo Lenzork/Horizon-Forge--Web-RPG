@@ -9,7 +9,8 @@ var readyToRenderItems = false;
 // Item Class 
 // ----------------------------------------------------------------
 class Item {
-    constructor(name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity){
+    constructor(id, name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity){
+        this.id = id;
         this.name = name;
         this.type = type;
         this.description = description;
@@ -21,6 +22,10 @@ class Item {
         this.requiredlevel = requiredlevel;
         this.icon = icon;
         this.rarity = rarity;
+    }
+
+    getItemID(){
+        return this.id;
     }
 
     getName(){
@@ -124,13 +129,104 @@ socket.on("createInventory", () => {
 
 })
 
-socket.on("receiveItem", (name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity) => {
+socket.on("receiveItem", (id, name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity) => {
     // Create new item
-    var newItem = new Item(name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity);
+    var newItem = new Item(id, name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity);
 
     // Push the new item into the local localItems variable
     pushLocalItems(newItem);
 })
+
+function allowDrop(ev) {
+    ev.preventDefault();
+  }
+  
+  function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.id);
+    console.log("Works!");
+  }
+  
+  function drop(ev) {
+    var returnDiv = document.getElementById("inventoryGrid");
+    
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData("text");
+    console.log(ev.target);
+    if(ev.target.className == "slot1" && ev.target.children.length == 0){
+        console.log("Head");
+        ev.target.appendChild(document.getElementById(data));
+        if(localItems[ev.target.firstChild.id].getType() == 0){
+            console.log(localItems[ev.target.firstChild.id].getItemID());
+            socket.emit("equip_head", localItems[ev.target.firstChild.id].getItemID());
+        } else {
+            alert("Item is not of Type Head");
+            returnDiv.appendChild(document.getElementById(data));
+        }
+    }
+    if(ev.target.className == "slot2" && ev.target.children.length == 0){
+        console.log("Chest");
+        ev.target.appendChild(document.getElementById(data));
+        if(localItems[ev.target.firstChild.id].getType() == 1){
+            console.log(localItems[ev.target.firstChild.id].getItemID());
+            socket.emit("equip_chest", localItems[ev.target.firstChild.id].getItemID());
+        } else {
+            alert("Item is not of Type Chest");
+            returnDiv.appendChild(document.getElementById(data));
+        }
+    }
+    if(ev.target.className == "slot3" && ev.target.children.length == 0){
+        console.log("Leg");
+        ev.target.appendChild(document.getElementById(data));
+        if(localItems[ev.target.firstChild.id].getType() == 2){
+            console.log(localItems[ev.target.firstChild.id].getItemID());
+            socket.emit("equip_leg", localItems[ev.target.firstChild.id].getItemID());
+        } else {
+            alert("Item is not of Type Legs");
+            returnDiv.appendChild(document.getElementById(data));
+        }
+    }
+    if(ev.target.className == "slot4" && ev.target.children.length == 0){
+        console.log("Hands");
+        ev.target.appendChild(document.getElementById(data));
+        if(localItems[ev.target.firstChild.id].getType() == 3){
+            console.log(localItems[ev.target.firstChild.id].getItemID());
+            socket.emit("equip_hand", localItems[ev.target.firstChild.id].getItemID());
+        } else {
+            alert("Item is not of Type Hands");
+            returnDiv.appendChild(document.getElementById(data));
+        }
+    }
+    if(ev.target.className == "slot5" && ev.target.children.length == 0){
+        console.log("Boots");
+        ev.target.appendChild(document.getElementById(data));
+        if(localItems[ev.target.firstChild.id].getType() == 4){
+            console.log(localItems[ev.target.firstChild.id].getItemID());
+            socket.emit("equip_boot", localItems[ev.target.firstChild.id].getItemID());
+        } else {
+            alert("Item is not of Type Boots");
+            returnDiv.appendChild(document.getElementById(data));
+        }
+    }
+    if(ev.target.className == "inventoryGrid"){
+        ev.target.appendChild(document.getElementById(data));
+        console.log(localItems[ev.target.lastChild.id].getItemID());
+        if(localItems[ev.target.lastChild.id].getType() == 0){
+            socket.emit("unequip_head", localItems[ev.target.lastChild.id].getItemID());
+        }
+        if(localItems[ev.target.lastChild.id].getType() == 1){
+            socket.emit("unequip_chest", localItems[ev.target.lastChild.id].getItemID());
+        }
+        if(localItems[ev.target.lastChild.id].getType() == 2){
+            socket.emit("unequip_leg", localItems[ev.target.lastChild.id].getItemID());
+        }
+        if(localItems[ev.target.lastChild.id].getType() == 3){
+            socket.emit("unequip_hand", localItems[ev.target.lastChild.id].getItemID());
+        }
+        if(localItems[ev.target.lastChild.id].getType() == 4){
+            socket.emit("unequip_boot", localItems[ev.target.lastChild.id].getItemID());
+        }
+    }
+}
 
 function pushLocalItems(item){
     localItems.push(item);
@@ -151,16 +247,16 @@ function pushLocalItems(item){
         for(var i = 0; i < localItems.length; i++){
             console.log(localItems[i].getName());
             clone.style.display = null;
-            clone.id = "inventory-item-" + i;
+            clone.id = i;
             inventory.appendChild(clone);
 
             
 
-            var itemText = document.getElementById("inventory-item-" + i).getElementsByClassName("inventory-item-name")[0];
+            var itemText = document.getElementById(i).getElementsByClassName("inventory-item-name")[0];
             itemText.innerHTML = localItems[i].getName();
             itemText.style.color = localItems[i].getQualityColor();
 
-            var itemIcon = document.getElementById("inventory-item-" + i).getElementsByClassName("inventory-item-icon")[0];
+            var itemIcon = document.getElementById(i).getElementsByClassName("inventory-item-icon")[0];
             itemIcon.src = "../" + localItems[i].getIcon();
 
             // Declaring Item Informations for the Modal
@@ -210,6 +306,9 @@ function pushLocalItems(item){
             modalitemInformationIsWeapon.innerHTML = itemSoulbound;
 
         });
+
+        clone.draggable = true;
+        clone.ondragstart = function(){drag(event); };
     }
 }
 

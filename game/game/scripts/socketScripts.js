@@ -70,12 +70,10 @@ class Character {
 
     doCharacterPVPAlgorithm(){
         var currentCR = this.getCharacterPVPCR();
-        var rankBeforeCR;
         var rank;
         pvpRanks.forEach((current) => {
             if(currentCR >= current.getMinCR()){
                 rank = current.id;
-                rankBeforeCR = current.getMinCR();
             }
         })
         return rank;

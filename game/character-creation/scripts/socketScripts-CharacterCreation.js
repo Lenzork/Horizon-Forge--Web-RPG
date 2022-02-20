@@ -74,10 +74,10 @@ characterCreateButton.addEventListener("click", function() {
             }
     })
     
-    if((exports.characterNameInput.value.length <= 18 && exports.characterNameInput.value.length >= 4) && characterClass && characterServer && !blacklistedNameDetected){
-        socket.emit("createCharacter", characterName, characterClass, characterServer.name);
+    if((exports.characterNameInput.value.length <= 18 && exports.characterNameInput.value.length >= 4) && (exports.characterCodeInput.value.length <= 28 && exports.characterCodeInput.value.length >=4) && characterClass && characterServer && !blacklistedNameDetected){
+        socket.emit("createCharacter", characterName, characterCodeInput.value, characterClass, characterServer.name);
     } else {
-        alert("Character could not be created! Please select a class and enter a valid name!");
+        alert("Character could not be created! Please select a class and enter a valid name and code!");
     }
 });
 

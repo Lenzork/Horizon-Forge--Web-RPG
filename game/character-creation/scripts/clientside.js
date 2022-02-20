@@ -14,6 +14,7 @@ written on 12/02/2022
 //Player creation elements
 characterNameText = document.getElementById("characterNameTop");
 characterNameInput = document.getElementById("characterNameInput");
+characterCodeInput = document.getElementById("characterCodeInput");
 characterPicture = document.getElementById("characterPicture");
 characterCreateButton = document.getElementById("characterCreationButton");
 
@@ -69,4 +70,4 @@ console.log("Character creation %c clientside Script %c has been %c sucessfully 
 //----------------------------------------------------------------
 // Exports
 //----------------------------------------------------------------
-exports = {characterNameText, characterNameInput, characterPicture, classWarriorRadioButton, classWizardRadioButton, classArcherRadioButton, currentServerText, currentServerUsers};
+exports = {characterNameText, characterNameInput, characterCodeInput, characterPicture, classWarriorRadioButton, classWizardRadioButton, classArcherRadioButton, currentServerText, currentServerUsers};

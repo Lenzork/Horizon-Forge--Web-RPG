@@ -26,10 +26,23 @@
     </div>
     <div class="middle-div">
         <center>
-        <h1>Inventory</h1>
-        <div class="inventoryGrid" id="inventoryGrid">
+        <h1>Character Equip</h1>
+        <div class="character-equipment">
+            <h2>Head</h2>
+            <h2>Chest</h2>
+            <h2>Leg</h2>
+            <h2>Hand</h2>
+            <h2>Boot</h2>
+            <div class="slot1" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="slot2" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="slot3" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="slot4" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="slot5" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         </div>
-        <div class="inventory-item" style="display: none;"><img class="inventory-item-icon" src="../images/icons/fire_dagger.png" style="max-height: 100px; max-width: 100px;"><p class="inventory-item-name"></p></div>
+        <h1>Inventory</h1>
+        <div class="inventoryGrid" id="inventoryGrid" ondrop="drop(event)" ondragover="allowDrop(event)">
+        </div>
+        <div class="inventory-item" style="display: none;"><img draggable="false" class="inventory-item-icon" src="../images/icons/fire_dagger.png" style="max-height: 100px; max-width: 100px;"><p class="inventory-item-name"></p></div>
         
         <!-- The Modal -->
         <div id="myModal" class="modal">
