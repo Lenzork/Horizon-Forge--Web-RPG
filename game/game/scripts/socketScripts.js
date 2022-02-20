@@ -1,149 +1,193 @@
 var socket = io.connect();
-var itemRares = null;
 var characterID = null;
-var localItems = [];
-var readyToRenderItems = false;
+var pvpRanks = [];
+var titles = [];
+var readyToRenderPVPRanks = false;
+var readyToRenderTitle = false;
+var localPlayer;
 
 // ----------------------------------------------------------------
-// Item Class 
+// Character Class 
 // ----------------------------------------------------------------
-class Item {
-    constructor(name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity){
+class Character {
+    constructor(characterId, characterName, characterLevel, characterClass, characterPortrait, characterAttackpower, characterHealth, characterDefense, characterPvpCR, title){
+        this.characterId = characterId;
+        this.characterName = characterName;
+        this.characterLevel = characterLevel;
+        this.characterClass = characterClass;
+        this.characterPortrait = characterPortrait;
+        this.characterAttackpower = characterAttackpower;
+        this.characterHealth = characterHealth;
+        this.characterDefense = characterDefense;
+        this.characterPvpCR = characterPvpCR;
+        this.title = title;
+    }
+
+    getCharacterId(){
+        return this.characterId;
+    }
+    
+    getCharacterName(){
+        return this.characterName;
+    }
+
+    getCharacterLevel(){
+        return this.characterLevel;
+    }
+
+    getCharacterClass(){
+        return this.characterClass
+    }
+
+    getCharacterPortrait(){
+        return this.characterPortrait;
+    }
+
+    getCharacterAttackpower(){
+        return this.characterAttackpower;
+    }
+
+    getCharacterHealth(){
+        return this.characterHealth;
+    }
+
+    getCharacterDefense(){
+        return this.characterDefense;
+    }
+
+    getCharacterPVPRank(){
+        return this.characterPvpRank;
+    }
+
+    getCharacterPVPIcon(){
+        return pvpRanks[this.doCharacterPVPAlgorithm()].getIcon();
+    }
+
+    getCharacterPVPRankName(){
+        
+        return pvpRanks[this.doCharacterPVPAlgorithm()].getName();
+    }
+
+    doCharacterPVPAlgorithm(){
+        var currentCR = this.getCharacterPVPCR();
+        var rankBeforeCR;
+        var rank;
+        pvpRanks.forEach((current) => {
+            if(currentCR >= current.getMinCR()){
+                rank = current.id;
+                rankBeforeCR = current.getMinCR();
+            }
+        })
+        return rank;
+    }
+    
+    getCharacterPVPCR(){
+        return this.characterPvpCR;
+    }
+
+    getEquippedCharacterTitle(){
+        return this.title;
+    }
+
+    getEquippedCharacterTitleText(){
+        if(this.title != -1){
+            return titles[this.getEquippedCharacterTitle()].getTitleWithCharacterName(this.characterName, true);
+        }
+        return this.getCharacterName();
+    }
+}
+
+// ----------------------------------------------------------------
+// PVP Ranks
+// ----------------------------------------------------------------
+class PvpRank {
+    constructor(id, name, icon, mincr){
+        this.id = id;
         this.name = name;
-        this.type = type;
-        this.description = description;
-        this.sellprice = sellprice;
-        this.buyprice = buyprice;
-        this.soulbound = soulbound;
-        this.isWeapon = isWeapon;
-        this.damage = damage;
-        this.requiredlevel = requiredlevel;
         this.icon = icon;
-        this.rarity = rarity;
+        this.mincr = mincr;
+    }
+
+    getID(){
+        return this.id;
     }
 
     getName(){
         return this.name;
     }
 
-    getType(){
-        return this.type;
-    }
-
-    getTypeName(){
-        return itemRares[this.type];
-    }
-
-    getDescription(){
-        return this.description;
-    }
-
-    getSellPrice(){
-        return this.sellprice;
-    }
-
-    getBuyPrice(){
-        return this.buyprice;
-    }
-
-    getSoulBound(){
-        return this.soulbound;
-    }
-
-    getIsWeapon(){
-        return this.isWeapon;
-    }
-
-    getDamage(){
-        return this.damage;
-    }
-
-    getRequiredLevel(){
-        return this.requiredlevel;
-    }
-
     getIcon(){
         return this.icon;
     }
 
-    getRarity(){
-        return this.rarity;
+    getMinCR(){
+        return this.mincr;
     }
-
-    getQualityColor(){
-        if(this.getRarity() == "Poor"){
-            return "#9d9d9d";
-        }
-        if(this.getRarity() == "Common"){
-            return "#ffffff";
-        }
-        if(this.getRarity() == "Uncommon"){
-            return "#1eff00";
-        }
-        if(this.getRarity() == "Rare"){
-            return "#0070dd";
-        }
-        if(this.getRarity() == "Epic"){
-            return "#a335ee";
-        }
-        if(this.getRarity() == "Legendary"){
-            return "#ff8000";
-        }
-        if(this.getRarity() == "Artifact"){
-            return "#e6cc80";
-        }
-        return "#9d9d9d";
-    }
-
 }
 
-function getAccountItems(){
-    socket.emit("fetchItems");
+function pushPVPRanks(item){
+    pvpRanks.push(item);
 }
 
-socket.on("createInventory", () => {
-    
-    readyToRenderItems = true;
+// ----------------------------------------------------------------
+// Titles
+// ----------------------------------------------------------------
+class Title {
+    constructor(id, title){
+        this.id = id;
+        this.title = title;
+    }
 
+    getTitle(){
+        return this.title;
+    }
+
+    getTitleWithCharacterName(characterName, before){
+        if(before){
+            return this.title + " " + characterName
+        }
+        if(!before){
+            return characterName + " " + this.title;
+        }
+    }
+}
+
+function pushTitles(item){
+    titles.push(item);
+}
+
+socket.on("createNewPVPRank", (id, name, icon, mincr) => {
+    var newRank = new PvpRank(id, name, icon, mincr);
+    pushPVPRanks(newRank);
+
+    if(readyToRenderPVPRanks){
+        var characterPVPRankInfo = document.getElementById("PVPRankIcon");
+        var characterPVPRankName = document.getElementById("PVPRankName");
+        var characterPVPRankCRText = document.getElementById("PVPRankCR");
+
+        characterPVPRankInfo.src = localPlayer.getCharacterPVPIcon();
+        characterPVPRankName.innerHTML = localPlayer.getCharacterPVPRankName();
+        characterPVPRankCRText.innerHTML = localPlayer.getCharacterPVPCR();
+
+    }
+});
+
+socket.on("setReadyToRenderTitle", () => {
+    readyToRenderTitle = true;
 })
 
-socket.on("receiveItem", (name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity) => {
-    // Create new item
-    var newItem = new Item(name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity);
+socket.on("receiveTitle", (id, title) => {
+    var newTitle = new Title(id, title);
 
-    // Push the new item into the local localItems variable
-    pushLocalItems(newItem);
-})
+    pushTitles(newTitle);
 
-function pushLocalItems(item){
-    localItems.push(item);
-    console.log(localItems);
+    console.log(titles);
+    if(readyToRenderTitle){
+        var characterNameText = document.getElementById("characterName");
 
-    if(readyToRenderItems){
-        var inventory = document.getElementById("inventoryGrid");
-        var itemTemplate = document.getElementsByClassName("inventory-item")[0];
-        var clone = itemTemplate.cloneNode(true);
-
-        
-
-        console.log(localItems);
-        console.log("Items fetched");
-
-        for(var i = 0; i < localItems.length; i++){
-            console.log(localItems[i].getName());
-            clone.style.display = null;
-            clone.id = "inventory-item-" + i;
-            inventory.appendChild(clone);
-
-            var itemText = document.getElementById("inventory-item-" + i).getElementsByClassName("inventory-item-name")[0];
-            itemText.innerHTML = localItems[i].getName();
-            itemText.style.color = localItems[i].getQualityColor();
-
-            var itemIcon = document.getElementById("inventory-item-" + i).getElementsByClassName("inventory-item-icon")[0];
-            itemIcon.src = localItems[i].getIcon();
-        }
+        characterNameText.innerHTML = localPlayer.getEquippedCharacterTitleText();
     }
-}
+})
 
 // Join Game call to Server
 socket.emit("joinedGame");
@@ -151,32 +195,42 @@ socket.emit("joinedGame");
 // Verification for the Server Room
 socket.on("RoomsVerification", (param) => {console.log(param)});
 
+socket.emit("getPVPRanks");
+
+socket.emit("getUserTitles");
+
+socket.on("readyToRenderPVPRanks", () => {
+    readyToRenderPVPRanks = true;
+});
+
 // Setting all the Elements with the Data from the Database
-socket.on("loginVerification", (characterId, characterName, characterPortrait, characterAttackpower, characterHealth, characterDefense, itemRarities) => {
+socket.on("loginVerification", (characterId, characterName, characterLevel, characterClass, characterPortrait, characterAttackpower, characterHealth, characterDefense, itemRarities, characterPvpCR, title) => {
+    var playerCharacter = new Character(characterId, characterName, characterLevel, characterClass, characterPortrait, characterAttackpower, characterHealth, characterDefense, characterPvpCR, title)
+    
+    localPlayer = playerCharacter;
+
     var characterNameText = document.getElementById("characterName");
     var characterPortraitImg = document.getElementById("characterPortrait");
     var characterStrengthValueText = document.getElementById("characterStrengthValue");
     var characterHealthValueText = document.getElementById("characterHealthValue");
     var characterDefenseValueText = document.getElementById("characterDefenseValue");
+    var characterInfoText = document.getElementById("character-Class-Level");
 
     characterID = characterId;
 
-    // Set fetched item Rarities
-    itemRares = itemRarities;
-
     // Set the Element properties
-    characterNameText.innerHTML = characterName;
-    characterPortraitImg.src = "../images/portraits/" + characterPortrait;
-    characterStrengthValueText.innerHTML = characterAttackpower;
-    characterHealthValueText.innerHTML = characterHealth;
-    characterDefenseValueText.innerHTML = characterDefense;
+    characterNameText.innerHTML = playerCharacter.characterName;
+    characterInfoText.innerHTML =  playerCharacter.characterClass + " - Level " + playerCharacter.characterLevel;
+    characterPortraitImg.src = "../images/portraits/" + playerCharacter.characterPortrait;
+    characterStrengthValueText.innerHTML = playerCharacter.characterAttackpower;
+    characterHealthValueText.innerHTML = playerCharacter.characterHealth;
+    characterDefenseValueText.innerHTML = playerCharacter.characterDefense;
 
-    getAccountItems();
-    
     console.log("Works!");
 })
 
 
 
 socket.on("getCharacterInformations", () => {
-    console.log("Test");})
+    console.log("Test");
+})

@@ -80,3 +80,7 @@ characterCreateButton.addEventListener("click", function() {
         alert("Character could not be created! Please select a class and enter a valid name!");
     }
 });
+
+socket.on("sendAlert", (receivingMessage) => {
+    alert(receivingMessage);
+});

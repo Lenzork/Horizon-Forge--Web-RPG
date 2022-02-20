@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizon Forge: Web RPG => Game</title>
+    <link rel="stylesheet" href="/inventory/css/inventory-stylesheet.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/inventory/scripts/socketScripts.js"></script>
+</head>
+<body>
+    <div class="left-div">
+        <center>
+        <div class="parent">
+            
+            <a href="/game"><div class="div1"><h1>My Character</h1></div></a>
+            <div class="div2"><h1>Inventory</h1></div>
+            <div class="div3"><h1>Marketplace</h1></div>
+            <div class="div4"><h1>PVP</h1></div>
+            <div class="div5"><h1>Missions</h1></div>
+            <div class="div6"><h1>Options</h1></div>
+        </div>
+        <div class="version-text">ALPHA VERSION</div>
+        </center>
+    </div>
+    <div class="middle-div">
+        <center>
+        <h1>Inventory</h1>
+        <div class="inventoryGrid" id="inventoryGrid">
+        </div>
+        <div class="inventory-item" style="display: none;"><img class="inventory-item-icon" src="../images/icons/fire_dagger.png" style="max-height: 100px; max-width: 100px;"><p class="inventory-item-name"></p></div>
+        
+        <!-- The Modal -->
+        <div id="myModal" class="modal">
+
+            <!-- Modal content -->
+            <div class="modal-content">
+            <span class="close">&times;</span>
+            <h1 id="modal-item-name"></h1>
+            <img src="" id="modal-item-icon">
+            <hr>
+            <h4 class="modal-item-description" id="modal-item-description"></h4>
+            <hr><br>
+            <div class="modal-item-information-grid">
+                <div class="modal-item-information-grid-content-1" id="modal-item-information-soulbound"> </div>
+                <div class="modal-item-information-grid-content-2" id="modal-item-information-isWeapon"> </div>
+            </div>
+            </div>
+        
+        </div>
+    </center></div>
+</body>
+</html>

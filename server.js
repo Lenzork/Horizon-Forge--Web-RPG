@@ -52,6 +52,7 @@ class Gameserver {
 
         ServerApp.use(ServerExpress.static(path.join(__dirname + '/game/character-creation')));
         ServerApp.use(ServerExpress.static(path.join(__dirname + '/game/game')));
+        ServerApp.use(ServerExpress.static(path.join(__dirname + '/game/inventory')));
 
         ServerApp.get('/', (req, res) => {
             res.render(path.join(__dirname + '/index.html'));
@@ -88,15 +89,83 @@ class Gameserver {
 
             //this.stop(ServerServer);  <--Stop the Server
 
-            socket.on('createCharacter', (characterName, characterClass, characterServer) => {
-                console.log(socket.id + " wants to create a character");
-                console.log("Character name: " + characterName);
-                console.log("Character Class: " + characterClass);
-                console.log("On Server: " + characterServer);
+            socket.on('createCharacter', (characterName, characterClass, characterServer, characterPicture) => {
+                var canCreate = false;
+
+                function getCanCreate(){
+                    return canCreate;
+                }
+
+                function setCanCreate(value){
+                    canCreate = value;
+                }
+
+                con.query("SELECT * FROM characters WHERE name = ?", characterName, function(error, results, fields) {
+                    if(error) throw error;
+                    if(results.length == 0){
+                        setCanCreate(true);
+                    }
+                
+
+                console.log(getCanCreate());
+
+                if(getCanCreate()) {
+                    console.log(socket.id + " wants to create a character");
+                    console.log("Character name: " + characterName);
+                    console.log("Character Class: " + characterClass);
+                    console.log("On Server: " + characterServer);
+
+                    var characterPortrait;
+
+                    if(characterClass == "Warrior"){
+                        characterPortrait = "24.png";
+                    }
+                    if(characterClass == "Wizard"){
+                        characterPortrait = "23.png";
+                    }
+                    if(characterClass == "Archer"){
+                        characterPortrait = "28.png";
+                    }
+
+                    con.query('SELECT id FROM characters ORDER BY id DESC LIMIT 1;', function(error, results, fields) {
+                        if (error) throw error;
+                        console.log(results[0].id);
+                    
+                    con.query('INSERT INTO `characters` (`id`, `name`, `code`, `level`, `portrait`, `class`, `attackpower`, `health`, `defense`, `pvpcr`) VALUES (?, ?, ?, 1, ?, ?, 100, 100, 100, 0);', [results[0].id + 1, characterName, "defaultPassword", characterPortrait, characterClass], function(error2, results2, fields2) {
+                        if (error2) throw error2;
+                        console.log("Created new character!");
+                    })
+                    })
+                    io.to(socket.id).emit("sendAlert", "Character has been created successfully!");
+                } else {
+                    io.to(socket.id).emit("sendAlert", "A Character with that Name already exists");
+                }
             })
+            });
 
             socket.on("receiveServer", () => {
                 io.to(socket.id).emit("getConnectedServer", this, config.mainServerPort, io.engine.clientsCount, this.blacklistedNames);
+            })
+
+            socket.on("getPVPRanks", () => {
+                console.log("User " + socket.id + " wants to receive the PVP Ranks");
+                con.query('SELECT * FROM pvpranks', function(error, results, fields) {
+                    if (error) throw error;
+                    for (var i = 0; i < results.length; i++){
+                        io.to(socket.id).emit("createNewPVPRank", results[i].id, results[i].name, results[i].icon, results[i].mincr);
+                    }
+                })
+                io.to(socket.id).emit("readyToRenderPVPRanks");
+            })
+
+            socket.on("getUserTitles", () => {
+                con.query('SELECT * FROM titles', function(error, results, fields) {
+                    if (error) throw error;
+                    for (var i = 0; i < results.length; i++){
+                        io.to(socket.id).emit("receiveTitle", results[i].id, results[i].title);
+                    }
+                })
+                io.to(socket.id).emit("setReadyToRenderTitle");
             })
 
             socket.on("joinedGame", () => {
@@ -116,7 +185,7 @@ class Gameserver {
                 con.query("SELECT * FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
                     if (error) throw error;
                     console.log(results)
-                    io.to(socket.id).emit("loginVerification", results[0].id, results[0].name, results[0].portrait, results[0].attackpower, results[0].health, results[0].defense, itemRarities);
+                    io.to(socket.id).emit("loginVerification", results[0].id, results[0].name, results[0].level, results[0].class, results[0].portrait, results[0].attackpower, results[0].health, results[0].defense, itemRarities, results[0].pvpcr, results[0].title);
                     socket.dbID = results[0].id;
                     socket.leave("characterCreation");
                     console.log(socket.id + " is now ingame with " + results[0].name);
@@ -125,6 +194,8 @@ class Gameserver {
             })
 
             socket.on("fetchItems", () => { // HIER ALS LETZTES STEHENGEBLIEBEN 18.02.2022 -> Die Items wurden immer weiter *2 genommen auf der Charakter Seite und dann sind da irgendwann tausende Objekte
+
+                console.log(socket.dbID);
 
                 con.query('SELECT * FROM characters_inventorys WHERE characterid = ?', socket.dbID, function(error, results1, fields) {
                     if (error) throw error;
@@ -222,6 +293,28 @@ class Gameserver {
                 // Output username
                 console.log("true");
                 response.render(__dirname + "/game/game/index.html");
+
+                let username = request.session.username;
+                
+
+                io.sockets.on('connection', (socket) => {
+                    socket.username = username;
+                    
+                });
+            } else {
+                // Not logged in
+                response.redirect('../');
+                console.log("false");
+            }
+            response.end();
+        });
+
+        ServerApp.get('/game/inventory', function(request, response) {
+            // If the user is loggedin
+            if (request.session.loggedin) {
+                // Output username
+                console.log("true");
+                response.render(__dirname + "/game/game/inventory.html");
 
                 let username = request.session.username;
                 

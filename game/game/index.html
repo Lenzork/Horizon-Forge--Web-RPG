@@ -14,11 +14,12 @@
         <center>
         <div class="parent">
             
-            <div class="div1"><h1>Home</h1></div>
-            <div class="div2"><h1>Marketplace</h1></div>
-            <div class="div3"><h1>PVP</h1></div>
-            <div class="div4"><h1>Missions</h1></div>
-            <div class="div5"><h1>Options</h1></div>
+            <div class="div1"><h1>My Character</h1></div>
+            <a href="./game/inventory/"><div class="div2"><h1>Inventory</h1></div></a>
+            <div class="div3"><h1>Marketplace</h1></div>
+            <div class="div4"><h1>PVP</h1></div>
+            <div class="div5"><h1>Missions</h1></div>
+            <div class="div6"><h1>Options</h1></div>
         </div>
         <div class="version-text">ALPHA VERSION</div>
         </center>
@@ -30,7 +31,8 @@
         </div>
         <br>
         <img id="characterPortrait">
-        <!--<hr>-->
+        <h3 id="character-Class-Level">Class - Level X</h3>
+        <hr>
         <br><br>
         <div class="parent1">
             <div class="div11"><h1>💪</h1><br><p id="characterStrengthValue"></p></div>
@@ -38,9 +40,14 @@
             <div class="div31"><h1>🛡️</h1><br><p id="characterDefenseValue"></p></div>
         </div>
         <br>
-        <div class="inventoryGrid" id="inventoryGrid">
+        <hr>
+        <h1>Ranks</h1>
+        <div id="PVPRank" class="PVPRank">
+            <img id="PVPRankIcon" src="../images/ranks/Rank1_1.png">
+            <p class="PVPRankNameText" id="PVPRankName"></p>
+            <p class="PVPRankCRText" id="PVPRankCR"></p>
         </div>
-        <div class="inventory-item" style="display: none;"><img class="inventory-item-icon" src="../images/icons/fire_dagger.png" style="width: 50%; height: 50%;"><p class="inventory-item-name"></p></div>
+        <br>
     </center></div>
 </body>
 </html>
