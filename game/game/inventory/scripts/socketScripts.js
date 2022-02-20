@@ -9,7 +9,7 @@ var readyToRenderItems = false;
 // Item Class 
 // ----------------------------------------------------------------
 class Item {
-    constructor(id, name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity, equipped){
+    constructor(id, name, type, description, sellprice, buyprice, soulbound, isWeapon, bonus_damage, bonus_health, bonus_defense, requiredlevel, icon, rarity, equipped){
         this.id = id;
         this.name = name;
         this.type = type;
@@ -18,7 +18,9 @@ class Item {
         this.buyprice = buyprice;
         this.soulbound = soulbound;
         this.isWeapon = isWeapon;
-        this.damage = damage;
+        this.bonus_damage = bonus_damage;
+        this.bonus_health = bonus_health;
+        this.bonus_defense = bonus_defense;
         this.requiredlevel = requiredlevel;
         this.icon = icon;
         this.rarity = rarity;
@@ -78,7 +80,7 @@ class Item {
     }
 
     getDamage(){
-        return this.damage;
+        return this.bonus_damage;
     }
 
     getRequiredLevel(){
@@ -134,9 +136,9 @@ socket.on("createInventory", () => {
 
 })
 
-socket.on("receiveItem", (id, name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity, equipped) => {
+socket.on("receiveItem", (id, name, type, description, sellprice, buyprice, soulbound, isWeapon, bonus_damage, bonus_health, bonus_defense, requiredlevel, icon, rarity, equipped) => {
     // Create new item
-    var newItem = new Item(id, name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity, equipped);
+    var newItem = new Item(id, name, type, description, sellprice, buyprice, soulbound, isWeapon, bonus_damage, bonus_health, bonus_defense, requiredlevel, icon, rarity, equipped);
 
     // Push the new item into the local localItems variable
     pushLocalItems(newItem);
@@ -212,6 +214,17 @@ function allowDrop(ev) {
             returnDiv.appendChild(document.getElementById(data));
         }
     }
+    if(ev.target.className == "slot6" && ev.target.children.length == 0){
+        console.log("Weapon");
+        ev.target.appendChild(document.getElementById(data));
+        if(localItems[ev.target.firstChild.id].getType() == 5){
+            console.log(localItems[ev.target.firstChild.id].getItemID());
+            socket.emit("equip_weapon", localItems[ev.target.firstChild.id].getItemID());
+        } else {
+            alert("Item is not of Type Weapon");
+            returnDiv.appendChild(document.getElementById(data));
+        }
+    }
     if(ev.target.className == "inventoryGrid"){
         ev.target.appendChild(document.getElementById(data));
         console.log(localItems[ev.target.lastChild.id].getItemID());
@@ -229,6 +242,9 @@ function allowDrop(ev) {
         }
         if(localItems[ev.target.lastChild.id].getType() == 4){
             socket.emit("unequip_boot", localItems[ev.target.lastChild.id].getItemID());
+        }
+        if(localItems[ev.target.lastChild.id].getType() == 5){
+            socket.emit("unequip_weapon", localItems[ev.target.lastChild.id].getItemID());
         }
     }
 }
@@ -248,6 +264,7 @@ function pushLocalItems(item){
         var legSlot = document.getElementById("slot3");
         var handSlot = document.getElementById("slot4");
         var bootSlot = document.getElementById("slot5");
+        var weaponSlot = document.getElementById("slot6");
         
         var itemDescription;
         var itemIsWeapon;
@@ -276,6 +293,9 @@ function pushLocalItems(item){
                 }
                 if(localItems[i].getType() == 4){
                     bootSlot.appendChild(clone);
+                }
+                if(localItems[i].getType() == 5){
+                    weaponSlot.appendChild(clone);
                 }
             } else {
                 inventory.appendChild(clone);

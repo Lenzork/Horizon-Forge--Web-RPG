@@ -387,6 +387,47 @@ class Gameserver {
                 });
             })
 
+            /* Weapon */
+            socket.on("equip_weapon", (itemid) => {
+                con.query("SELECT id FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results[0].id);
+                    console.log(results[0].id + " " + itemid);
+                    con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
+                        if (error) throw error;
+                        console.log(results2.length);
+                        if(results2.length > 0){
+                            console.log(socket.username + " equipped an weapon with the id " + itemid);
+                            con.query("UPDATE characters SET equipped_weapon = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
+                                if (error) throw error;
+                            });
+                        }
+                    })
+                })
+            })
+            socket.on("unequip_weapon", (itemid) => {
+                con.query("SELECT type FROM items WHERE id = ?", itemid, function(error, results, fields){
+                    if(error) throw error;
+                    if(results[0].type == 5){
+                    con.query("SELECT id FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
+                        if (error) throw error;
+                        console.log(results[0].id);
+                        console.log(results[0].id + " " + itemid);
+                        con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
+                            if (error) throw error;
+                            console.log(results2.length);
+                            if(results2.length > 0){
+                                console.log(socket.username + " unequipped an weapon with the id " + itemid);
+                                con.query("UPDATE characters SET equipped_weapon = ? WHERE id = ?", [-1, results[0].id], function(error, results, fields) {
+                                    if (error) throw error;
+                                });
+                            }
+                        })
+                    })
+                    }
+                });
+            })
+
             /* END OF EQUIPS */
 
 
@@ -411,7 +452,7 @@ class Gameserver {
                             
                             con.query("SELECT * FROM items WHERE id = ?", itemid, function(error, results, fields) {
                                 if (error) throw error;
-                                con.query("SELECT equipped_head, equipped_chest, equipped_leg, equipped_hand, equipped_boot FROM characters WHERE id = ?", socket.dbID, function(error2, results2, fields2) {
+                                con.query("SELECT equipped_head, equipped_chest, equipped_leg, equipped_hand, equipped_boot, equipped_weapon FROM characters WHERE id = ?", socket.dbID, function(error2, results2, fields2) {
 
                                     var gotEquipped = false;
                                     if(results2[0].equipped_head == results[0].id){
@@ -429,8 +470,11 @@ class Gameserver {
                                     if(results2[0].equipped_boot == results[0].id){
                                         gotEquipped = true;
                                     }
+                                    if(results2[0].equipped_weapon == results[0].id){
+                                        gotEquipped = true;
+                                    }
                                 
-                                io.to(socket.id).emit("receiveItem", results[0].id, results[0].name, results[0].type, results[0].description, results[0].sellprice, results[0].buyprice, results[0].soulbound, results[0].isWeapon, results[0].damage, results[0].requiredlevel, results[0].icon, results[0].rarity, gotEquipped);
+                                io.to(socket.id).emit("receiveItem", results[0].id, results[0].name, results[0].type, results[0].description, results[0].sellprice, results[0].buyprice, results[0].soulbound, results[0].isWeapon, results[0].bonus_damage, results[0].bonus_health, results[0].bonus_defense, results[0].requiredlevel, results[0].icon, results[0].rarity, gotEquipped);
                                 //items.push(item);
                                 })
                             })
