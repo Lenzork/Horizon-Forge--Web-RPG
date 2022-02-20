@@ -9,7 +9,7 @@ var readyToRenderItems = false;
 // Item Class 
 // ----------------------------------------------------------------
 class Item {
-    constructor(id, name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity){
+    constructor(id, name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity, equipped){
         this.id = id;
         this.name = name;
         this.type = type;
@@ -22,6 +22,7 @@ class Item {
         this.requiredlevel = requiredlevel;
         this.icon = icon;
         this.rarity = rarity;
+        this.equipped = equipped;
     }
 
     getItemID(){
@@ -117,6 +118,10 @@ class Item {
         return "#9d9d9d";
     }
 
+    getEquipped(){
+        return this.equipped;
+    }
+
 }
 
 function getAccountItems(){
@@ -129,9 +134,9 @@ socket.on("createInventory", () => {
 
 })
 
-socket.on("receiveItem", (id, name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity) => {
+socket.on("receiveItem", (id, name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity, equipped) => {
     // Create new item
-    var newItem = new Item(id, name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity);
+    var newItem = new Item(id, name, type, description, sellprice, buyprice, soulbound, isWeapon, damage, requiredlevel, icon, rarity, equipped);
 
     // Push the new item into the local localItems variable
     pushLocalItems(newItem);
@@ -236,6 +241,13 @@ function pushLocalItems(item){
         var inventory = document.getElementById("inventoryGrid");
         var itemTemplate = document.getElementsByClassName("inventory-item")[0];
         var clone = itemTemplate.cloneNode(true);
+
+        /* Equipment Slots */
+        var headSlot = document.getElementById("slot1");
+        var chestSlot = document.getElementById("slot2");
+        var legSlot = document.getElementById("slot3");
+        var handSlot = document.getElementById("slot4");
+        var bootSlot = document.getElementById("slot5");
         
         var itemDescription;
         var itemIsWeapon;
@@ -248,9 +260,26 @@ function pushLocalItems(item){
             console.log(localItems[i].getName());
             clone.style.display = null;
             clone.id = i;
-            inventory.appendChild(clone);
 
-            
+            if(localItems[i].getEquipped()){
+                if(localItems[i].getType() == 0){
+                    headSlot.appendChild(clone);
+                }
+                if(localItems[i].getType() == 1){
+                    chestSlot.appendChild(clone);
+                }
+                if(localItems[i].getType() == 2){
+                    legSlot.appendChild(clone);
+                }
+                if(localItems[i].getType() == 3){
+                    handSlot.appendChild(clone);
+                }
+                if(localItems[i].getType() == 4){
+                    bootSlot.appendChild(clone);
+                }
+            } else {
+                inventory.appendChild(clone);
+            }
 
             var itemText = document.getElementById(i).getElementsByClassName("inventory-item-name")[0];
             itemText.innerHTML = localItems[i].getName();
@@ -263,7 +292,9 @@ function pushLocalItems(item){
             itemDescription = localItems[i].getDescription();
             itemIsWeapon = localItems[i].getIsWeaponText();
             itemSoulbound = localItems[i].getSoulBoundText();
-            
+
+            socket.emit("checkIfItemIsEquipped", localItems[i].getItemID(), i);
+            console.log(localItems[i].getItemID());
         }
 
         clone.addEventListener("click", function() {

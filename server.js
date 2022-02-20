@@ -411,12 +411,28 @@ class Gameserver {
                             
                             con.query("SELECT * FROM items WHERE id = ?", itemid, function(error, results, fields) {
                                 if (error) throw error;
-                                var item;
-                                //item = new Item(results[0].name, results[0].type, results[0].description, results[0].sellprice, results[0].buyprice, results[0].soulbound, results[0].isWeapon, results[0].damage, results[0].requiredlevel, results[0].icon, results[0].rarity);
-                                io.to(socket.id).emit("receiveItem", results[0].id, results[0].name, results[0].type, results[0].description, results[0].sellprice, results[0].buyprice, results[0].soulbound, results[0].isWeapon, results[0].damage, results[0].requiredlevel, results[0].icon, results[0].rarity);
-                                console.log(item);
-                                //items.push(item);
+                                con.query("SELECT equipped_head, equipped_chest, equipped_leg, equipped_hand, equipped_boot FROM characters WHERE id = ?", socket.dbID, function(error2, results2, fields2) {
+
+                                    var gotEquipped = false;
+                                    if(results2[0].equipped_head == results[0].id){
+                                        gotEquipped = true;
+                                    }
+                                    if(results2[0].equipped_chest == results[0].id){
+                                        gotEquipped = true;
+                                    }
+                                    if(results2[0].equipped_leg == results[0].id){
+                                        gotEquipped = true;
+                                    }
+                                    if(results2[0].equipped_hand == results[0].id){
+                                        gotEquipped = true;
+                                    }
+                                    if(results2[0].equipped_boot == results[0].id){
+                                        gotEquipped = true;
+                                    }
                                 
+                                io.to(socket.id).emit("receiveItem", results[0].id, results[0].name, results[0].type, results[0].description, results[0].sellprice, results[0].buyprice, results[0].soulbound, results[0].isWeapon, results[0].damage, results[0].requiredlevel, results[0].icon, results[0].rarity, gotEquipped);
+                                //items.push(item);
+                                })
                             })
                             
                             
