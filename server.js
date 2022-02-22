@@ -53,6 +53,7 @@ class Gameserver {
         ServerApp.use(ServerExpress.static(path.join(__dirname + '/game/character-creation')));
         ServerApp.use(ServerExpress.static(path.join(__dirname + '/game/game')));
         ServerApp.use(ServerExpress.static(path.join(__dirname + '/game/inventory')));
+        ServerApp.use(ServerExpress.static(path.join(__dirname + '/game/marketplace')));
 
         ServerApp.get('/', (req, res) => {
             res.render(path.join(__dirname + '/index.html'));
@@ -211,12 +212,17 @@ class Gameserver {
                     con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
                         if (error) throw error;
                         console.log(results2.length);
-                        if(results2.length > 0){
-                            console.log(socket.username + " equipped an helmet with the id " + itemid);
-                            con.query("UPDATE characters SET equipped_head = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
-                                if (error) throw error;
-                            });
-                        }
+                        con.query("SELECT * FROM items WHERE id = ?", results2[0].itemid, function(error, results3, fields) {
+                            if (error) throw error;
+                            if(results2.length > 0 && results3[0].type == 0){
+                                console.log(socket.username + " equipped an helmet with the id " + itemid);
+                                con.query("UPDATE characters SET equipped_head = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
+                                    if (error) throw error;
+                                });
+                            } else {
+                                console.log("User " + socket.username + " tried to equip an head (ID: " + results2[0].itemid + ") which has not the correct itemtype for head Slot");
+                            }
+                        })
                     })
                 })
             })
@@ -247,12 +253,17 @@ class Gameserver {
                     con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
                         if (error) throw error;
                         console.log(results2.length);
-                        if(results2.length > 0){
-                            console.log(socket.username + " equipped an chest with the id " + itemid);
-                            con.query("UPDATE characters SET equipped_chest = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
-                                if (error) throw error;
-                            });
-                        }
+                        con.query("SELECT * FROM items WHERE id = ?", results2[0].itemid, function(error, results3, fields) {
+                            if (error) throw error;
+                            if(results2.length > 0 && results3[0].type == 1){
+                                console.log(socket.username + " equipped an chest with the id " + itemid);
+                                con.query("UPDATE characters SET equipped_chest = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
+                                    if (error) throw error;
+                                });
+                            } else {
+                                console.log("User " + socket.username + " tried to equip an chest (ID: " + results2[0].itemid + ") which has not the correct itemtype for chest Slot");
+                            }
+                        })
                     })
                 })
             })
@@ -283,12 +294,17 @@ class Gameserver {
                     con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
                         if (error) throw error;
                         console.log(results2.length);
-                        if(results2.length > 0){
-                            console.log(socket.username + " equipped an leg with the id " + itemid);
-                            con.query("UPDATE characters SET equipped_leg = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
-                                if (error) throw error;
-                            });
-                        }
+                        con.query("SELECT * FROM items WHERE id = ?", results2[0].itemid, function(error, results3, fields) {
+                            if (error) throw error;
+                            if(results2.length > 0 && results3[0].type == 2){
+                                console.log(socket.username + " equipped an leg with the id " + itemid);
+                                con.query("UPDATE characters SET equipped_leg = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
+                                    if (error) throw error;
+                                });
+                            } else {
+                                console.log("User " + socket.username + " tried to equip an leg (ID: " + results2[0].itemid + ") which has not the correct itemtype for leg Slot");
+                            }
+                        })
                     })
                 })
             })
@@ -319,12 +335,17 @@ class Gameserver {
                     con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
                         if (error) throw error;
                         console.log(results2.length);
-                        if(results2.length > 0){
-                            console.log(socket.username + " equipped an hand with the id " + itemid);
-                            con.query("UPDATE characters SET equipped_hand = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
-                                if (error) throw error;
-                            });
-                        }
+                        con.query("SELECT * FROM items WHERE id = ?", results2[0].itemid, function(error, results3, fields) {
+                            if (error) throw error;
+                            if(results2.length > 0 && results3[0].type == 3){
+                                console.log(socket.username + " equipped an hand with the id " + itemid);
+                                con.query("UPDATE characters SET equipped_hand = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
+                                    if (error) throw error;
+                                });
+                            } else {
+                                console.log("User " + socket.username + " tried to equip an hand (ID: " + results2[0].itemid + ") which has not the correct itemtype for hand Slot");
+                            }
+                        })
                     })
                 })
             })
@@ -355,12 +376,17 @@ class Gameserver {
                     con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
                         if (error) throw error;
                         console.log(results2.length);
-                        if(results2.length > 0){
-                            console.log(socket.username + " equipped an boot with the id " + itemid);
-                            con.query("UPDATE characters SET equipped_boot = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
-                                if (error) throw error;
-                            });
-                        }
+                        con.query("SELECT * FROM items WHERE id = ?", results2[0].itemid, function(error, results3, fields) {
+                            if (error) throw error;
+                            if(results2.length > 0 && results3[0].type == 4){
+                                console.log(socket.username + " equipped an boot with the id " + itemid);
+                                con.query("UPDATE characters SET equipped_boot = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
+                                    if (error) throw error;
+                                });
+                            } else {
+                                console.log("User " + socket.username + " tried to equip an boot (ID: " + results2[0].itemid + ") which has not the correct itemtype for boot Slot");
+                            }
+                        })
                     })
                 })
             })
@@ -396,12 +422,17 @@ class Gameserver {
                     con.query("SELECT * FROM characters_inventorys WHERE characterid = ? AND itemid = ?", [results[0].id, itemid], function(error, results2, fields) {
                         if (error) throw error;
                         console.log(results2.length);
-                        if(results2.length > 0){
-                            console.log(socket.username + " equipped an weapon with the id " + itemid);
-                            con.query("UPDATE characters SET equipped_weapon = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
-                                if (error) throw error;
-                            });
-                        }
+                        con.query("SELECT * FROM items WHERE id = ?", results2[0].itemid, function(error, results3, fields) {
+                            if (error) throw error;
+                            if(results2.length > 0 && results3[0].type == 5){
+                                console.log(socket.username + " equipped an weapon with the id " + itemid);
+                                con.query("UPDATE characters SET equipped_weapon = ? WHERE id = ?", [itemid, results[0].id], function(error, results, fields) {
+                                    if (error) throw error;
+                                });
+                            } else {
+                                console.log("User " + socket.username + " tried to equip an weapon (ID: " + results2[0].itemid + ") which has not the correct itemtype for weapon Slot");
+                            }
+                        })
                     })
                 })
             })
@@ -580,6 +611,28 @@ class Gameserver {
                 // Output username
                 console.log("true");
                 response.render(__dirname + "/game/game/inventory.html");
+
+                let username = request.session.username;
+                
+
+                io.sockets.on('connection', (socket) => {
+                    socket.username = username;
+                    
+                });
+            } else {
+                // Not logged in
+                response.redirect('../');
+                console.log("false");
+            }
+            response.end();
+        });
+
+        ServerApp.get('/game/marketplace', function(request, response) {
+            // If the user is loggedin
+            if (request.session.loggedin) {
+                // Output username
+                console.log("true");
+                response.render(__dirname + "/game/game/marketplace.html");
 
                 let username = request.session.username;
                 
