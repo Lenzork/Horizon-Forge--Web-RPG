@@ -380,6 +380,6 @@ socket.on("loginVerification", (characterId, characterName, characterLevel, char
 
 
 
-socket.on("getCharacterInformations", () => {
-    console.log("Test");
+socket.on("sendAlert", (receivingMessage) => {
+    alert(receivingMessage);
 });
