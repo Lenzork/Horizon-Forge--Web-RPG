@@ -605,12 +605,13 @@ class Gameserver {
             response.end();
         });
 
-        ServerApp.get('/game/inventory', function(request, response) {
+        ServerApp.get('/inventory', function(request, response) {
+            console.log("Works?");
             // If the user is loggedin
             if (request.session.loggedin) {
                 // Output username
                 console.log("true");
-                response.render(__dirname + "/game/game/inventory.html");
+                response.render(__dirname + "/game/inventory/index.html");
 
                 let username = request.session.username;
                 
@@ -627,12 +628,16 @@ class Gameserver {
             response.end();
         });
 
-        ServerApp.get('/game/marketplace', function(request, response) {
+        //ServerApp.get('*', function (req, res) {
+        //    console.log(__dirname);
+        //})
+
+        ServerApp.get('/marketplace', function(request, response) {
             // If the user is loggedin
             if (request.session.loggedin) {
                 // Output username
                 console.log("true");
-                response.render(__dirname + "/game/game/marketplace.html");
+                response.render(__dirname + "/game/marketplace/index.html");
 
                 let username = request.session.username;
                 

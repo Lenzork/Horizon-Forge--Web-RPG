@@ -306,7 +306,7 @@ function pushLocalItems(item){
             itemText.style.color = localItems[i].getQualityColor();
 
             var itemIcon = document.getElementById(i).getElementsByClassName("inventory-item-icon")[0];
-            itemIcon.src = "../" + localItems[i].getIcon();
+            itemIcon.src = localItems[i].getIcon();
 
             // Declaring Item Informations for the Modal
             itemDescription = localItems[i].getDescription();

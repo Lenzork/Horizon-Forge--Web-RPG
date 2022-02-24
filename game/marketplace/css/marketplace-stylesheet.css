@@ -154,30 +154,29 @@ body hr {
     box-shadow: 0 0 1em rgb(139, 233, 240);
 }
 
-.inventoryGrid {
+.marketplaceGrid {
     background-color: rgba(0, 0, 0, 0.8);
     border: 1px solid white;
-    border-radius: 15px;
     width: 95%;
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(5, minmax(175px, 3fr));
     grid-column-gap: 10px;
     grid-row-gap: 10px;
 }
 
-.inventoryGrid div {
+.marketplaceGrid div {
     height: 100%;
     width: 100%;
 }
 
-.inventory-item {
+.marketplace-item {
     color: white;
     background-color: rgba(56, 56, 56, 0.3);
     border: 1px solid white;
 }
 
-.inventory-item:hover {
+.marketplace-item:hover {
     color: white;
     background-color: rgba(56, 56, 56, 0.8);
     border: 1px solid white;
