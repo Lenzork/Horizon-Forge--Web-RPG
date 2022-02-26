@@ -461,6 +461,20 @@ class Gameserver {
 
             /* END OF EQUIPS */
 
+            /* MARKETPLACE */
+            socket.on("fetchMarketplaceItems", () => {
+                con.query("SELECT * FROM marketplace_listings", function(error, results, fields) {
+                    if(error) throw error;
+                    results.forEach(element => {
+                        con.query("SELECT * FROM items WHERE id = ?", element.itemid, (error2, results2, fields) => {
+                            if(error2) throw error2;
+                            io.to(socket.id).emit("receiveMarketplaceItem", element.id, element.itemid, results2[0].icon, results2[0].name, results2[0].description, element.buyoutprice, element.sellerid);
+                        })
+                    });
+                })
+            })
+            /* END OF MARKETPLACE */
+
 
             socket.on("fetchItems", () => { // HIER ALS LETZTES STEHENGEBLIEBEN 18.02.2022 -> Die Items wurden immer weiter *2 genommen auf der Charakter Seite und dann sind da irgendwann tausende Objekte
 
