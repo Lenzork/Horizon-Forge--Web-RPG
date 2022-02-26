@@ -39,6 +39,24 @@ class Item {
         return this.type;
     }
 
+    getTypeNameText(){
+        if(this.type == 0){
+            return "Head";
+        } else if (this.type == 1) {
+            return "Chest";
+        } else if (this.type == 2) {
+            return "Leg";
+        } else if (this.type == 3) {
+            return "Hand";
+        } else if (this.type == 4) {
+            return "Boot";
+        } else if (this.type == 5) {
+            return "Weapon";
+        } else if (this.type == 6) {
+            return "Misc";
+        } else { return "Unknown"; }
+    }
+
     getTypeName(){
         return itemRares[this.type];
     }
@@ -269,6 +287,7 @@ function pushLocalItems(item){
         var itemDescription;
         var itemIsWeapon;
         var itemSoulbound;
+        var itemType;
 
         console.log(localItems);
         console.log("Items fetched");
@@ -324,6 +343,7 @@ function pushLocalItems(item){
             itemDescription = localItems[i].getDescription();
             itemIsWeapon = localItems[i].getIsWeaponText();
             itemSoulbound = localItems[i].getSoulBoundText();
+            itemType = localItems[i].getTypeNameText();
 
             socket.emit("checkIfItemIsEquipped", localItems[i].getItemID(), i);
             console.log(localItems[i].getItemID());
@@ -358,6 +378,7 @@ function pushLocalItems(item){
             var modalItemDescriptionText = document.getElementById("modal-item-description");
             var modalItemInformationSoulbound = document.getElementById("modal-item-information-soulbound");
             var modalitemInformationIsWeapon = document.getElementById("modal-item-information-isWeapon");
+            var modalitemInformationType = document.getElementById("modal-item-information-type");
 
             modalItemHeaderText.innerHTML = clone.getElementsByClassName("inventory-item-name")[0].innerHTML;
             modalItemHeaderText.style.color = clone.getElementsByClassName("inventory-item-name")[0].style.color;
@@ -367,6 +388,7 @@ function pushLocalItems(item){
             modalItemDescriptionText.innerHTML = itemDescription;
             modalItemInformationSoulbound.innerHTML = itemIsWeapon;
             modalitemInformationIsWeapon.innerHTML = itemSoulbound;
+            modalitemInformationType.innerHTML = itemType;
 
         });
 
