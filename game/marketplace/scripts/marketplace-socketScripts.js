@@ -165,6 +165,10 @@ socket.on("receiveMarketplaceItem", (id, itemid, itemicon, itemname, itemDescrip
     newItem.initElement();
 })
 
+socket.on("receiveMessageRequest", (message) => {
+    socket.emit("createNewInboxMessage", message);
+})
+
 socket.on("sendAlert", (receivingMessage) => {
     alert(receivingMessage);
 });

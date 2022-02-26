@@ -54,6 +54,7 @@ class Gameserver {
         ServerApp.use(ServerExpress.static(path.join(__dirname + '/game/game')));
         ServerApp.use(ServerExpress.static(path.join(__dirname + '/game/inventory')));
         ServerApp.use(ServerExpress.static(path.join(__dirname + '/game/marketplace')));
+        ServerApp.use(ServerExpress.static(path.join(__dirname + '/game/inbox')));
 
         ServerApp.get('/', (req, res) => {
             res.render(path.join(__dirname + '/index.html'));
@@ -494,7 +495,7 @@ class Gameserver {
                             if(error2) throw error2;
                             con.query("SELECT money FROM characters WHERE id = ?", results2[0].id, (error3, results3, fields3) => {
                                 if(error3) throw error3;
-                                if(results3[0].money > results[0].buyoutprice){
+                                if(results3[0].money >= results[0].buyoutprice){
                                     con.query("DELETE FROM marketplace_listings WHERE id = ?", listingID, (error5, results5, fields5) => {
                                         if(error5) throw error5;
                                         con.query("INSERT INTO characters_inventorys (id, characterid, itemid) VALUES (NULL, ?, ?)", [results2[0].id, results[0].itemid], (error4, results4, fields4) => {
@@ -507,6 +508,34 @@ class Gameserver {
                                                     con.query("UPDATE characters SET money = ? WHERE id = ?", [(results6[0].money + results[0].buyoutprice), results[0].sellerid], (error7, results7, fields7) => { // Seller Give money
                                                         if(error7) throw error7;
                                                         io.to(socket.id).emit("sendAlert", "Item buyed successfully!");
+                                                        con.query("SELECT * FROM items WHERE id = ?", results[0].itemid, (error8, results8, fields8) => {
+                                                            if(error8) throw error8;
+                                                            var color;
+                                                            if(results8[0].rarity == "Poor"){
+                                                                color = "#9d9d9d";
+                                                            } else
+                                                            if(results8[0].rarity == "Common"){
+                                                                color = "#ffffff";
+                                                            } else
+                                                            if(results8[0].rarity == "Uncommon"){
+                                                                color = "#1eff00";
+                                                            } else
+                                                            if(results8[0].rarity == "Rare"){
+                                                                color = "#0070dd";
+                                                            } else
+                                                            if(results8[0].rarity == "Epic"){
+                                                                color = "#a335ee";
+                                                            } else
+                                                            if(results8[0].rarity == "Legendary"){
+                                                                color = "#ff8000";
+                                                            } else
+                                                            if(results8[0].rarity == "Artifact"){
+                                                                color = "#e6cc80";
+                                                            } else {
+                                                                color = "#9d9d9d";
+                                                            }
+                                                            io.to(socket.id).emit("receiveMessageRequest", "Bought <span style='color:" + color + "'> " + results8[0].name + "</span> from the marketplace for <span style='color:yellow'> " + results[0].buyoutprice + "</span> Gold");
+                                                        })
                                                     })
                                                 })
                                             })
@@ -529,6 +558,28 @@ class Gameserver {
                 })
             })
             /* END OF MARKETPLACE */
+            /* INBOX */
+            socket.on("fetchInboxMessages", () => {
+                con.query("SELECT id FROM characters WHERE name = ?", socket.username, (error, results, fields) => {
+                    if(error) throw error;
+                    con.query("SELECT * FROM inbox_messages WHERE characterid = ? ORDER BY timestamp DESC", results[0].id, (error2, results2, fields2) => {
+                        if(error2) throw error2;
+                        results2.forEach(message => {
+                            io.to(socket.id).emit("receiveInboxMessage", message.id, message.message, message.timestamp);
+                        });
+                    })
+                })
+            })
+
+            socket.on("createNewInboxMessage", (message) => {
+                con.query("SELECT id FROM characters WHERE name = ?", socket.username, (error, results, fields) => {
+                    if(error) throw error;
+                    con.query("INSERT INTO inbox_messages (id, characterid, message, timestamp) VALUES (NULL, ?, ?, '" + new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + "')", [results[0].id, message], (error2, results2, fields2) => {
+                        if(error2) throw error2;
+                    })
+                })
+            })
+            /* END OF INBOX */
 
 
             socket.on("fetchItems", () => { // HIER ALS LETZTES STEHENGEBLIEBEN 18.02.2022 -> Die Items wurden immer weiter *2 genommen auf der Charakter Seite und dann sind da irgendwann tausende Objekte
@@ -707,6 +758,28 @@ class Gameserver {
                 // Output username
                 console.log("true");
                 response.render(__dirname + "/game/marketplace/index.html");
+
+                let username = request.session.username;
+                
+
+                io.sockets.on('connection', (socket) => {
+                    socket.username = username;
+                    
+                });
+            } else {
+                // Not logged in
+                response.redirect('../');
+                console.log("false");
+            }
+            response.end();
+        });
+
+        ServerApp.get('/inbox', function(request, response) {
+            // If the user is loggedin
+            if (request.session.loggedin) {
+                // Output username
+                console.log("true");
+                response.render(__dirname + "/game/inbox/index.html");
 
                 let username = request.session.username;
                 
