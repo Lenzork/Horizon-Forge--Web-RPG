@@ -280,22 +280,34 @@ function pushLocalItems(item){
 
             if(localItems[i].getEquipped()){
                 if(localItems[i].getType() == 0){
-                    headSlot.appendChild(clone);
+                    if(headSlot.children.length < 1){
+                        headSlot.appendChild(clone);
+                    }
                 }
                 if(localItems[i].getType() == 1){
-                    chestSlot.appendChild(clone);
+                    if(chestSlot.children.length < 1){
+                        chestSlot.appendChild(clone);
+                    }
                 }
                 if(localItems[i].getType() == 2){
-                    legSlot.appendChild(clone);
+                    if(legSlot.children.length < 1){
+                        legSlot.appendChild(clone);
+                    }
                 }
                 if(localItems[i].getType() == 3){
-                    handSlot.appendChild(clone);
+                    if(handSlot.children.length < 1){
+                        handSlot.appendChild(clone);
+                    }
                 }
                 if(localItems[i].getType() == 4){
-                    bootSlot.appendChild(clone);
+                    if(bootSlot.children.length < 1){
+                        bootSlot.appendChild(clone);
+                    }
                 }
                 if(localItems[i].getType() == 5){
-                    weaponSlot.appendChild(clone);
+                    if(weaponSlot.children.length < 1){
+                        weaponSlot.appendChild(clone);
+                    }
                 }
             } else {
                 inventory.appendChild(clone);

@@ -10,7 +10,7 @@ var localPlayer;
 // Character Class 
 // ----------------------------------------------------------------
 class Character {
-    constructor(characterId, characterName, characterLevel, characterClass, characterPortrait, characterAttackpower, characterHealth, characterDefense, characterPvpCR, title){
+    constructor(characterId, characterName, characterLevel, characterClass, characterPortrait, characterAttackpower, characterHealth, characterDefense, characterPvpCR, title, equippedItems){
         this.characterId = characterId;
         this.characterName = characterName;
         this.characterLevel = characterLevel;
@@ -21,6 +21,65 @@ class Character {
         this.characterDefense = characterDefense;
         this.characterPvpCR = characterPvpCR;
         this.title = title;
+        this.equippedItems = equippedItems;
+
+        this.equippedItemsStrengthValue = [];
+        this.equippedItemsHealthValue = [];
+        this.equippedItemsDefenseValue = []
+    }
+
+    addEquippedItemsStrengthValue(value){
+        this.equippedItemsStrengthValue.push(value);
+        this.updateStrengthText();
+    }
+
+    addEquippedItemsHealthValue(value){
+        this.equippedItemsHealthValue.push(value);
+        this.updateHealthText();
+    }
+
+    addEquippedItemsDefenseValue(value){
+        this.equippedItemsDefenseValue.push(value);
+        this.updateDefenseText();
+    }
+
+    getEquippedItemsStrengthValue(){
+        var value = 0;
+        this.equippedItemsStrengthValue.forEach(element => {
+            value = value + element;
+        });
+        return value;
+    }
+
+    getEquippedItemsHealthValue(){
+        var value = 0;
+        this.equippedItemsHealthValue.forEach(element => {
+            value = value + element;
+        });
+        return value;
+    }
+
+    getEquippedItemsDefenseValue(){
+        var value = 0;
+        this.equippedItemsDefenseValue.forEach(element => {
+            value = value + element;
+        });
+        return value;
+    }
+
+    updateStrengthText(){
+        var characterStrengthValueText = document.getElementById("characterStrengthValue");
+        characterStrengthValueText.innerHTML = (this.characterAttackpower + this.getEquippedItemsStrengthValue());
+    }
+
+    updateHealthText(){
+        var characterHealthText = document.getElementById("characterHealthValue");
+        characterHealthText.innerHTML = (this.characterHealth + this.getEquippedItemsHealthValue());
+    }
+
+    updateDefenseText(){
+        var characterDefenseText = document.getElementById("characterDefenseValue");
+        characterDefenseText.innerHTML = (this.characterDefense + this.getEquippedItemsDefenseValue());
     }
 
     getCharacterId(){
@@ -92,6 +151,15 @@ class Character {
             return titles[this.getEquippedCharacterTitle()].getTitleWithCharacterName(this.characterName, true);
         }
         return this.getCharacterName();
+    }
+
+    getCharacterStrength(){
+        this.equippedItems.forEach(item => {
+            if(item != -1){
+                socket.emit("getItem", item);
+                console.log(item);
+            }
+        });
     }
 }
 
@@ -201,12 +269,24 @@ socket.on("readyToRenderPVPRanks", () => {
     readyToRenderPVPRanks = true;
 });
 
+// Item sockets
+socket.on("receiveItemStrengthValue", (value) => {
+    localPlayer.addEquippedItemsStrengthValue(value);
+})
+
+socket.on("receiveItemHealthValue", (value) => {
+    localPlayer.addEquippedItemsHealthValue(value);
+})
+
+socket.on("receiveItemDefenseValue", (value) => {
+    localPlayer.addEquippedItemsDefenseValue(value);
+})
+
 // Setting all the Elements with the Data from the Database
-socket.on("loginVerification", (characterId, characterName, characterLevel, characterClass, characterPortrait, characterAttackpower, characterHealth, characterDefense, itemRarities, characterPvpCR, title) => {
-    var playerCharacter = new Character(characterId, characterName, characterLevel, characterClass, characterPortrait, characterAttackpower, characterHealth, characterDefense, characterPvpCR, title)
+socket.on("loginVerification", (characterId, characterName, characterLevel, characterClass, characterPortrait, characterAttackpower, characterHealth, characterDefense, itemRarities, characterPvpCR, title, equippedItems) => {
+    var playerCharacter = new Character(characterId, characterName, characterLevel, characterClass, characterPortrait, characterAttackpower, characterHealth, characterDefense, characterPvpCR, title, equippedItems)
     
     localPlayer = playerCharacter;
-
     var characterNameText = document.getElementById("characterName");
     var characterPortraitImg = document.getElementById("characterPortrait");
     var characterStrengthValueText = document.getElementById("characterStrengthValue");
@@ -223,6 +303,8 @@ socket.on("loginVerification", (characterId, characterName, characterLevel, char
     characterStrengthValueText.innerHTML = playerCharacter.characterAttackpower;
     characterHealthValueText.innerHTML = playerCharacter.characterHealth;
     characterDefenseValueText.innerHTML = playerCharacter.characterDefense;
+
+    localPlayer.getCharacterStrength();
 
     console.log("Works!");
 })

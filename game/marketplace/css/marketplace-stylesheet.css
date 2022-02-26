@@ -159,14 +159,39 @@ body hr {
     border: 1px solid white;
     width: 95%;
     display: grid;
-    grid-template-rows: repeat(5, minmax(175px, 3fr));
-    grid-column-gap: 10px;
-    grid-row-gap: 10px;
+}
+
+table.GeneratedTable {
+    width: 100%;
+    border-collapse: collapse;
+    border-width: 2px;
+    border-color: #6b6b6b;
+    border-style: solid;
+    color: #ffffff;
+  }
+  
+  table.GeneratedTable td, table.GeneratedTable th {
+    border-width: 2px;
+    border-color: #6b6b6b;
+    border-style: solid;
+    padding: 5px;
+  }
+  
+  table.GeneratedTable thead {
+  }
+
+.marketplaceHeader {
+    height: 50px;
 }
 
 .marketplaceGrid div {
     height: 100%;
     width: 100%;
+}
+
+.marketplace-item-icon {
+    max-height: 150px;
+    max-width: 150px;
 }
 
 .marketplace-item {

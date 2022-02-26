@@ -6,38 +6,102 @@ var localMarketplaceItems = [];
 
 /* Classes */
 class marketplaceItem {
-    constructor(id, itemid, itemname, itemicon, itemDescription, buyoutprice, sellerid, element){
+    constructor(id, itemid, itemname, itemicon, itemDescription, itemRarity, buyoutprice, sellerid, element){
         this.id = id;
         this.itemid = itemid;
         this.itemname = itemname;
         this.itemDescription = itemDescription;
+        this.itemRarity = itemRarity;
         this.buyoutprice = buyoutprice;
         this.sellerid = sellerid;
         this.itemicon = itemicon;
         this.element = element;
     }
 
+    getRarity(){
+        return this.itemRarity;
+    }
+
+    getQualityColor(){
+        if(this.getRarity() == "Poor"){
+            return "#9d9d9d";
+        }
+        if(this.getRarity() == "Common"){
+            return "#ffffff";
+        }
+        if(this.getRarity() == "Uncommon"){
+            return "#1eff00";
+        }
+        if(this.getRarity() == "Rare"){
+            return "#0070dd";
+        }
+        if(this.getRarity() == "Epic"){
+            return "#a335ee";
+        }
+        if(this.getRarity() == "Legendary"){
+            return "#ff8000";
+        }
+        if(this.getRarity() == "Artifact"){
+            return "#e6cc80";
+        }
+        return "#9d9d9d";
+    }
+
     initElement(){
-        var marketplace = document.getElementById("marketplaceGrid");
-        var itemTemplate = document.getElementsByClassName("marketplace-item")[0];
-        this.element = itemTemplate.cloneNode(true);
+        var marketplace = document.getElementById("marketplace-table");
+        
+        // Creating a new Table item
+        this.element = document.createElement("tr");
+
+        var c1 = document.createElement("td");
+        var itemPicture = document.createElement("img");
+        var itemName = document.createElement("p");
+
+        var c2 = document.createElement("td");
+        var itemBuyoutPrice = document.createElement("h4");
+
+        var c3 = document.createElement("td");
+        var itemBuyButton = document.createElement("button");
+
+        // Setting properties of the items
+        c1.style = "text-align: center;";
+        c2.style = "text-align: center;";
+        c3.style = "text-align: center;";
+
+        itemPicture.src = this.itemicon;
+        itemPicture.className = "marketplace-item-icon";
+        itemName.innerHTML = this.itemname;
+        itemName.className = "marketplace-item-name";
+        itemName.style = "color: " + this.getQualityColor() + ";";
+
+        itemBuyoutPrice.innerHTML = this.buyoutprice + ' <img src="../images/icons/things/3.png" style="max-width: 10px; max-height: 10px;">';
+        itemBuyoutPrice.className = "marketplace-item-buyout-price";
+
+        itemBuyButton.innerHTML = "Buy Item";
+        itemBuyButton.id = this.id;
+
+        //Adding the elements to the C's
+        c1.appendChild(itemPicture);
+        c1.appendChild(itemName);
+
+        c2.appendChild(itemBuyoutPrice);
+
+        c3.appendChild (itemBuyButton);
+
+        // Adding every of the elements to the main element
+        this.element.appendChild(c1);
+        this.element.appendChild(c2);
+        this.element.appendChild(c3);
 
         this.element.id = this.id;
     
         marketplace.appendChild(this.element);
-    
-        var itemText = this.element.getElementsByClassName("marketplace-item-name")[0];
-        itemText.innerHTML = this.itemname;
-    
-        var itemIcon = this.element.getElementsByClassName("marketplace-item-icon")[0];
-        itemIcon.src = this.itemicon;
-
-        var itemBuyoutPriceText = this.element.getElementsByClassName("marketplace-item-buyout-price")[0];
-        itemBuyoutPriceText.innerHTML = this.buyoutprice + ' <img src="../images/icons/things/3.png" style="max-width: 10px; max-height: 10px;">';
 
         var itemDescriptionText = this.itemDescription;
 
-        this.element.addEventListener("click", function() {
+        c1.addEventListener("click", openModal);
+
+        function openModal() {
             // Get the modal
             var modal = document.getElementById("myModal");
 
@@ -66,14 +130,19 @@ class marketplaceItem {
             var modalItemInformationSoulbound = document.getElementById("modal-item-information-soulbound");
             var modalitemInformationIsWeapon = document.getElementById("modal-item-information-isWeapon");
 
-            modalItemHeaderText.innerHTML = itemText.innerHTML;
-            modalItemHeaderText.style.color = itemText.style.color;
+            modalItemHeaderText.innerHTML = itemName.innerHTML;
+            modalItemHeaderText.style.color = itemName.style.color;
 
-            modalItemImage.src = itemIcon.src;
+            modalItemImage.src = itemPicture.src;
 
             modalItemDescriptionText.innerHTML = itemDescriptionText;
 
-        });
+        }
+
+        itemBuyButton.addEventListener("click", function(){
+            console.log("LocalPlayer tried to buy a item " + this.id);
+            socket.emit("buyMarketplaceItem", this.id);
+        })
 
         this.element.style.display = null;
     }
@@ -81,13 +150,21 @@ class marketplaceItem {
 }
 
 /* Socket Communications */
-socket.emit("fetchMarketplaceItems");
+socket.emit("fetchMarketplaceItems"); // Request items from the server
+socket.emit("requestPlayerMoney");
 
-socket.on("receiveMarketplaceItem", (id, itemid, itemicon, itemname, itemDescription, buyoutprice, sellerid) => {
-    
-    
-    var newItem = new marketplaceItem(id, itemid, itemname, itemicon, itemDescription, buyoutprice, sellerid);
+socket.on("receivePlayerMoney", (amount) => {
+    var playerGoldText = document.getElementById("playerMoney");
+    playerGoldText.innerHTML = 'Your Money: ' + amount + ' <img src="../images/icons/things/3.png" style="max-width: 13px; max-height: 13px;">';
+})
+
+socket.on("receiveMarketplaceItem", (id, itemid, itemicon, itemname, itemDescription, itemRarity, buyoutprice, sellerid) => { // Receiving an Answer from the Server
+    var newItem = new marketplaceItem(id, itemid, itemname, itemicon, itemDescription, itemRarity, buyoutprice, sellerid);
     localMarketplaceItems.push(newItem);
     console.log(localMarketplaceItems);
     newItem.initElement();
 })
+
+socket.on("sendAlert", (receivingMessage) => {
+    alert(receivingMessage);
+});

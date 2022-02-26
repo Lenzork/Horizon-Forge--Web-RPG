@@ -177,6 +177,15 @@ class Gameserver {
                 io.to(socket.id).emit("setReadyToRenderTitle");
             })
 
+            socket.on("getItem", (id) => {
+                con.query("SELECT * FROM items WHERE id = ?", id, (error, results, fields) => {
+                    if(error) throw error;
+                    io.to(socket.id).emit("receiveItemStrengthValue", results[0].bonus_damage);
+                    io.to(socket.id).emit("receiveItemHealthValue", results[0].bonus_health);
+                    io.to(socket.id).emit("receiveItemDefenseValue", results[0].bonus_defense);
+                })
+            })
+
             socket.on("joinedGame", () => {
                 socket.join("ingame");
 
@@ -193,8 +202,9 @@ class Gameserver {
                 // Getting character information
                 con.query("SELECT * FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
                     if (error) throw error;
-                    console.log(results)
-                    io.to(socket.id).emit("loginVerification", results[0].id, results[0].name, results[0].level, results[0].class, results[0].portrait, results[0].attackpower, results[0].health, results[0].defense, itemRarities, results[0].pvpcr, results[0].title);
+                    console.log(results);
+                    var equippedItems = [results[0].equipped_head, results[0].equipped_chest, results[0].equipped_leg, results[0].equipped_hand, results[0].equipped_boot, results[0].equipped_weapon];
+                    io.to(socket.id).emit("loginVerification", results[0].id, results[0].name, results[0].level, results[0].class, results[0].portrait, results[0].attackpower, results[0].health, results[0].defense, itemRarities, results[0].pvpcr, results[0].title, equippedItems);
                     socket.dbID = results[0].id;
                     socket.leave("characterCreation");
                     console.log(socket.id + " is now ingame with " + results[0].name);
@@ -463,14 +473,59 @@ class Gameserver {
 
             /* MARKETPLACE */
             socket.on("fetchMarketplaceItems", () => {
-                con.query("SELECT * FROM marketplace_listings", function(error, results, fields) {
+                con.query("SELECT id FROM characters WHERE name = ?", socket.username, (error, results, fields) => {
+                    con.query("SELECT * FROM marketplace_listings WHERE sellerid NOT IN (?)", results[0].id, function(error2, results2, fields2) {
+                        if(error2) throw error2;
+                        results2.forEach(element => {
+                            con.query("SELECT * FROM items WHERE id = ?", element.itemid, (error3, results3, fields) => {
+                                if(error3) throw error3;
+                                io.to(socket.id).emit("receiveMarketplaceItem", element.id, element.itemid, results3[0].icon, results3[0].name, results3[0].description, results3[0].rarity, element.buyoutprice, element.sellerid);
+                            })
+                        });
+                    })
+                })
+            })
+
+            socket.on("buyMarketplaceItem", (listingID) => {
+                con.query("SELECT * FROM marketplace_listings WHERE id = ?", listingID, (error, results, fields) => {
                     if(error) throw error;
-                    results.forEach(element => {
-                        con.query("SELECT * FROM items WHERE id = ?", element.itemid, (error2, results2, fields) => {
+                    if(results.length > 0){ // If listing was found
+                        con.query("SELECT id FROM characters WHERE name = ?", socket.username, (error2, results2, fields2) => {
                             if(error2) throw error2;
-                            io.to(socket.id).emit("receiveMarketplaceItem", element.id, element.itemid, results2[0].icon, results2[0].name, results2[0].description, element.buyoutprice, element.sellerid);
+                            con.query("SELECT money FROM characters WHERE id = ?", results2[0].id, (error3, results3, fields3) => {
+                                if(error3) throw error3;
+                                if(results3[0].money > results[0].buyoutprice){
+                                    con.query("DELETE FROM marketplace_listings WHERE id = ?", listingID, (error5, results5, fields5) => {
+                                        if(error5) throw error5;
+                                        con.query("INSERT INTO characters_inventorys (id, characterid, itemid) VALUES (NULL, ?, ?)", [results2[0].id, results[0].itemid], (error4, results4, fields4) => {
+                                            if(error4) throw error4;
+                                            con.query("UPDATE characters SET money = ? WHERE id = ?", [(results3[0].money - results[0].buyoutprice), results2[0].id], (error5, results5, fields5) => { // Buyer reduce money
+                                                if(error5) throw error5;
+
+                                                con.query("SELECT money FROM characters WHERE id = ?", results[0].sellerid, (error6, results6, fields6) => {
+                                                    if(error6) throw error6
+                                                    con.query("UPDATE characters SET money = ? WHERE id = ?", [(results6[0].money + results[0].buyoutprice), results[0].sellerid], (error7, results7, fields7) => { // Seller Give money
+                                                        if(error7) throw error7;
+                                                        io.to(socket.id).emit("sendAlert", "Item buyed successfully!");
+                                                    })
+                                                })
+                                            })
+
+                                        })
+                                    });
+                                } else {
+                                    io.to(socket.id).emit("sendAlert", "Not enough money to buy the listing!");
+                                }
+                            })
                         })
-                    });
+                        
+                    }
+                })
+            })
+
+            socket.on("requestPlayerMoney", () => {
+                con.query("SELECT money FROM characters WHERE name = ?", socket.username, (error, results, fields) => {
+                    io.to(socket.id).emit("receivePlayerMoney", results[0].money);
                 })
             })
             /* END OF MARKETPLACE */
@@ -713,6 +768,7 @@ server.listen(config.mainServerPort, () => {
         servers[i].start(config.mysqlServerAdress[i], config.mysqlUser[i], config.mysqlPassword[i], config.mysqlDatabaseName[i]);
     }
   }
+  servers[0].start(config.mysqlServerAdress[0], config.mysqlUser[0], config.mysqlPassword[0], config.mysqlDatabaseName[0]);
   console.log(servers);
 });
 
