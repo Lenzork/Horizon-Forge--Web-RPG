@@ -17,48 +17,6 @@ pvpQueue = [];
 // PVP Matches Array
 pvpMatches = [];
 
-// Gameserver Class to store all of the needed Informations into one Object
-class PVPMatch {
-    constructor(matchID, player1, player2){
-        this.matchID = matchID;
-        this.player1 = player1;
-        this.player2 = player2;
-
-        this.player1Joined = false;
-        this.player2Joined = false;
-
-        this.started = false;
-    }
-
-    setPlayer1Joined(bool){
-        this.player1Joined = bool;
-    }
-
-    setPlayer2Joined(bool){
-        this.player2Joined = bool;
-    }
-
-    returnPlayer1(){
-        return this.player1;
-    }
-
-    returnPlayer2(){
-        return this.player2;
-    }
-
-    bothPlayersJoined(){
-        if(this.player1Joined == true && this.player2Joined == true){
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    getMatchID(){
-        return this.matchID
-    }
-}
-
 class Gameserver {
     constructor(name, slots, port) {
         this.id = servers.length;
@@ -128,6 +86,505 @@ class Gameserver {
             });
         });
 
+        // Gameserver Class to store all of the needed Informations into one Object
+        class PVPMatch {
+            constructor(matchID, player1, player2){
+                this.matchID = matchID;
+                this.player1 = player1;
+                this.player2 = player2;
+
+                this.player1Joined = false;
+                this.player2Joined = false;
+
+                this.started = false;
+
+                /* INIT VARIABLES */
+                /* HEALTH VARIABLES */
+                this.player1MaxHealth = 100;
+                this.player2MaxHealth = 100;
+                this.player1CurrentHealth = 100;
+                this.player2CurrentHealth = 100;
+
+                /* DAMAGE VARIABLES */
+                this.player1Damage = 0;
+                this.player2Damage = 0;
+
+                /* DEFENSE VARIABLES */
+                this.player1Defense = 0;
+                this.player2Defense = 0;
+
+                /* MATCH VARIABLES */
+                this.hasMatchStarted = false;
+                this.isMatchFinished = false;
+                this.matchWinner = null;
+
+                this.whoHasTurn = null;
+
+                this.matchDefenseFactor = 100;
+                this.matchDefenseFactorIncreaseCounter = 0;
+
+                /* INIT CHECKS VARIABLES */
+                this.player1HealthInitialized = false;
+                this.player1DamageInitialized = false;
+                this.player1DefenseInitialized = false;
+                
+                this.player2HealthInitialized = false;
+                this.player2DamageInitialized = false;
+                this.player2DefenseInitialized = false;
+
+            }
+
+            setPlayer1Joined(bool){
+                this.player1Joined = bool;
+            }
+
+            setPlayer2Joined(bool){
+                this.player2Joined = bool;
+            }
+
+            /* INIT VARIABLES FUNCTIONS */
+            /* PLAYERS HEALTH */
+            setPlayer1MaxHealth(value){
+                console.log("Player1 Max Health set to value: " + value);
+                this.player1MaxHealth = value;
+            }
+
+            setPlayer1CurrentHealth(value){
+                this.player1CurrentHealth = value;
+            }
+
+            setPlayer2MaxHealth(value){
+                console.log("Player2 Max Health set to value: " + value);
+                this.player2MaxHealth = value;
+            }
+
+            setPlayer2CurrentHealth(value){
+                this.player2CurrentHealth = value;
+            }
+
+            getPlayer1MaxHealth(){
+                return this.player1MaxHealth;
+            }
+
+            getPlayer1CurrentHealth(){
+                return this.player1CurrentHealth;
+            }
+
+            getPlayer2MaxHealth(){
+                return this.player2MaxHealth;
+            }
+
+            getPlayer2CurrentHealth(){
+                return this.player2CurrentHealth;
+            }
+
+            /* PLAYERS DAMAGE */
+            setPlayer1Damage(value){
+                this.player1Damage = value;
+            }
+
+            getPlayer1Damage(){
+                return this.player1Damage;
+            }
+
+            setPlayer2Damage(value){
+                this.player2Damage = value;
+            }
+
+            getPlayer2Damage(){
+                return this.player2Damage;
+            }
+
+            /* PLAYERS DEFENSE */
+            setPlayer1Defense(value){
+                this.player1Defense = value;
+            }
+
+            getPlayer1Defense(){
+                return this.player1Defense;
+            }
+
+            setPlayer2Defense(value){
+                this.player2Defense = value;
+            }
+
+            getPlayer2Defense(){
+                return this.player2Defense;
+            }
+
+            /* FIGHTING SYSTEM FUNCTIONS */
+
+            doDamagePlayer1(value, io){
+                this.receiveDamagePlayer2(value, io);
+            }
+
+            receiveDamagePlayer1(value, io){
+                var damageAfterBlock = value*(this.matchDefenseFactor/(100+this.getPlayer1Defense()));
+                var blockedDamage = damageAfterBlock - value;
+                this.player1CurrentHealth = Math.round(this.player1CurrentHealth - damageAfterBlock);
+                io.to(this.getMatchID()).emit("newBattleLogMessage", this.player1.username + " received <span style='color:red;'>" + Math.round(damageAfterBlock) + "</span> (Blocked <span style='color: grey;'>" + Math.round(blockedDamage) + "</span>) damage ");
+            }
+
+            doDamagePlayer2(value, io){
+                this.receiveDamagePlayer1(value, io);
+            }
+
+            receiveDamagePlayer2(value, io){
+                var damageAfterBlock = value*(this.matchDefenseFactor/(100+this.getPlayer2Defense()));
+                var blockedDamage = damageAfterBlock - value;
+                this.player2CurrentHealth = Math.round(this.player2CurrentHealth - damageAfterBlock);
+                io.to(this.getMatchID()).emit("newBattleLogMessage", this.player2.username + " received <span style='color:red;'>" + Math.round(damageAfterBlock) + "</span> (Blocked <span style='color: grey;'>" + Math.round(blockedDamage) + "</span>) damage");
+            }
+
+            receiveHealingPlayer1(value, io){
+                if((this.player1CurrentHealth + value) < this.player1MaxHealth){
+                    io.to(this.getMatchID()).emit("newBattleLogMessage", this.player1.username + " received <span style='color:green;'>" + value + "</span> healing");
+                    this.player1CurrentHealth = this.player1CurrentHealth + value;
+                } else {
+                    var overheal = this.player1MaxHealth - (this.player1CurrentHealth + value);
+                    io.to(this.getMatchID()).emit("newBattleLogMessage", this.player1.username + " received <span style='color:green;'>" + (this.getPlayer1MaxHealth() - this.getPlayer1CurrentHealth()) + "</span> (Overheal: <span style='color: grey;'>" + overheal + "</span>) healing");
+                    this.player1CurrentHealth = this.player1MaxHealth;
+                }
+
+            }
+
+            receiveHealingPlayer2(value, io){
+                if((this.player2CurrentHealth + value) < this.player2MaxHealth){
+                    io.to(this.getMatchID()).emit("newBattleLogMessage", this.player2.username + " received <span style='color:green;'>" + value + "</span> healing");
+                    this.player2CurrentHealth = this.player2CurrentHealth + value;
+                } else {
+                    var overheal = this.player2MaxHealth - (this.player2CurrentHealth + value);
+                    io.to(this.getMatchID()).emit("newBattleLogMessage", this.player2.username + " received <span style='color:green;'>" + (this.getPlayer2MaxHealth() - this.getPlayer2CurrentHealth()) + "</span> (Overheal: <span style='color: grey;'>" + overheal + "</span>) healing");
+                    this.player2CurrentHealth = this.player2MaxHealth;
+                }
+            }
+
+            /* END OF INIT VARIABLES FUNCTIONS */
+
+            returnPlayer1(){
+                return this.player1;
+            }
+
+            returnPlayer2(){
+                return this.player2;
+            }
+
+            bothPlayersJoined(){
+                if(this.player1Joined == true && this.player2Joined == true){
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+            getMatchID(){
+                return this.matchID
+            }
+
+            initBothPlayers(io){
+                var thisMatch = this;
+                var equippedItemsP1 = [];
+                var equippedItemsP2 = [];
+
+                var P1EquippedItemsHealthValue = 0;
+                var P2EquippedItemsHealthValue = 0;
+
+                /* Init their Health and store it into the Obj */
+                /* PLAYER 1 HEALTH INIT */
+                con.query("SELECT * FROM characters WHERE name = ?", thisMatch.player1.username, (error, results, fields) => {
+                    equippedItemsP1 = [results[0].equipped_head, results[0].equipped_chest, results[0].equipped_leg, results[0].equipped_hand, results[0].equipped_boot, results[0].equipped_weapon];
+                    equippedItemsP1.forEach(item => {
+                        if(item != -1){
+                            con.query("SELECT * FROM items WHERE id = ?", item, (error2, results2, fields2) => {
+                                if(error2) throw error2;
+                                P1EquippedItemsHealthValue = P1EquippedItemsHealthValue + results2[0].bonus_health;
+                                thisMatch.setPlayer1MaxHealth(results[0].health + P1EquippedItemsHealthValue);
+                                thisMatch.setPlayer1CurrentHealth(results[0].health + P1EquippedItemsHealthValue);
+                                io.to(thisMatch.getMatchID()).emit("receiveP1Health", (results[0].health + P1EquippedItemsHealthValue), (results[0].health + P1EquippedItemsHealthValue));
+                                console.log("Set Player1 Mayhealth to: " + P1EquippedItemsHealthValue);
+                                thisMatch.player1HealthInitialized = true;
+                            })
+                        } else {
+                            thisMatch.setPlayer1MaxHealth(results[0].health + P1EquippedItemsHealthValue);
+                            thisMatch.setPlayer1CurrentHealth(results[0].health + P1EquippedItemsHealthValue);
+                            io.to(thisMatch.getMatchID()).emit("receiveP1Health", (results[0].health + P1EquippedItemsHealthValue), (results[0].health + P1EquippedItemsHealthValue));
+                            console.log("Set Player1 Mayhealth to: " + P1EquippedItemsHealthValue);
+                            thisMatch.player1HealthInitialized = true;
+                        }
+                    });
+                })
+                console.log(this.getPlayer1MaxHealth());
+                /* PLAYER 2 HEALTH INIT */
+                con.query("SELECT * FROM characters WHERE name = ?", thisMatch.player2.username, (error, results, fields) => {
+                    if(error) throw error;
+                    equippedItemsP2 = [results[0].equipped_head, results[0].equipped_chest, results[0].equipped_leg, results[0].equipped_hand, results[0].equipped_boot, results[0].equipped_weapon];
+                    equippedItemsP2.forEach(item => {
+                        if(item != -1){
+                            con.query("SELECT * FROM items WHERE id = ?", item, (error2, results2, fields2) => {
+                                if(error2) throw error2;
+                                P2EquippedItemsHealthValue = P2EquippedItemsHealthValue + results2[0].bonus_health;
+                                thisMatch.setPlayer2MaxHealth(results[0].health + P2EquippedItemsHealthValue);
+                                thisMatch.setPlayer2CurrentHealth(results[0].health + P2EquippedItemsHealthValue);
+                                io.to(thisMatch.getMatchID()).emit("receiveP2Health", (results[0].health + P2EquippedItemsHealthValue), (results[0].health + P2EquippedItemsHealthValue));
+                                console.log("Set Player2 Mayhealth to: " + P2EquippedItemsHealthValue);
+                                thisMatch.player2HealthInitialized = true;
+                            })
+                        } else {
+                            thisMatch.setPlayer2MaxHealth(results[0].health + P2EquippedItemsHealthValue);
+                            thisMatch.setPlayer2CurrentHealth(results[0].health + P2EquippedItemsHealthValue);
+                            io.to(thisMatch.getMatchID()).emit("receiveP2Health", (results[0].health + P2EquippedItemsHealthValue), (results[0].health + P2EquippedItemsHealthValue));
+                            console.log("Set Player2 Mayhealth to: " + P2EquippedItemsHealthValue);
+                            thisMatch.player2HealthInitialized = true;
+                        }
+                    });
+                })
+
+                var P1EquippedItemsDamageValue = 0;
+                var P2EquippedItemsDamageValue = 0;
+
+                /* Init their Damage and store it into the Obj */
+                /* PLAYER 1 DAMAGE INIT */
+                con.query("SELECT * FROM characters WHERE name = ?", thisMatch.player1.username, (error, results, fields) => {
+                    equippedItemsP1.forEach(item => {
+                        if(item != -1){
+                            con.query("SELECT * FROM items WHERE id = ?", item, (error2, results2, fields2) => {
+                                if(error2) throw error2;
+                                P1EquippedItemsDamageValue = P1EquippedItemsDamageValue + results2[0].bonus_damage;
+                                thisMatch.setPlayer1Damage(results[0].attackpower + P1EquippedItemsDamageValue);
+                                console.log("Set Player1 Damage to: " + thisMatch.getPlayer1Damage());
+                                this.player1DamageInitialized = true;
+                            })
+                        } else {
+                            thisMatch.setPlayer1Damage(results[0].attackpower + P1EquippedItemsDamageValue);
+                            console.log("Set Player1 Damage to: " + thisMatch.getPlayer1Damage());
+                            this.player1DamageInitialized = true;
+                        }
+                    });
+                })
+                console.log(this.getPlayer1Damage());
+                /* PLAYER 2 DAMAGE INIT */
+                con.query("SELECT * FROM characters WHERE name = ?", thisMatch.player2.username, (error, results, fields) => {
+                    equippedItemsP2.forEach(item => {
+                        if(item != -1){
+                            con.query("SELECT * FROM items WHERE id = ?", item, (error2, results2, fields2) => {
+                                if(error2) throw error2;
+                                P2EquippedItemsDamageValue = P2EquippedItemsDamageValue + results2[0].bonus_damage;
+                                thisMatch.setPlayer2Damage(results[0].attackpower + P2EquippedItemsDamageValue);
+                                console.log("Set Player2 Damage to: " + thisMatch.getPlayer2Damage());
+                                this.player2DamageInitialized = true;
+                            })
+                        } else {
+                            thisMatch.setPlayer2Damage(results[0].attackpower + P2EquippedItemsDamageValue);
+                            console.log("Set Player2 Damage to: " + thisMatch.getPlayer2Damage());
+                            this.player2DamageInitialized = true;
+                        }
+                    });
+                })
+                console.log(this.getPlayer2Damage());
+
+                var P1EquippedItemsDefenseValue = 0;
+                var P2EquippedItemsDefenseValue = 0;
+
+                /* Init their Defense and store it into the Obj */
+                /* PLAYER 1 DEFENSE INIT */
+                con.query("SELECT * FROM characters WHERE name = ?", thisMatch.player1.username, (error, results, fields) => {
+                    equippedItemsP1.forEach(item => {
+                        if(item != -1){
+                            con.query("SELECT * FROM items WHERE id = ?", item, (error2, results2, fields2) => {
+                                if(error2) throw error2;
+                                P1EquippedItemsDefenseValue = P1EquippedItemsDefenseValue + results2[0].bonus_defense;
+                                thisMatch.setPlayer1Defense(results[0].defense + P1EquippedItemsDefenseValue);
+                                console.log("Set Player1 Defense to: " + thisMatch.getPlayer1Defense());
+                                this.player1DefenseInitialized = true;
+                            })
+                        } else {
+                            thisMatch.setPlayer1Defense(results[0].defense + P1EquippedItemsDefenseValue);
+                            console.log("Set Player1 Defense to: " + thisMatch.getPlayer1Defense());
+                            this.player1DefenseInitialized = true;
+                        }
+                    });
+                })
+                console.log(this.getPlayer1Defense());
+                /* PLAYER 2 DEFENSE INIT */
+                con.query("SELECT * FROM characters WHERE name = ?", thisMatch.player2.username, (error, results, fields) => {
+                    equippedItemsP2.forEach(item => {
+                        if(item != -1){
+                            con.query("SELECT * FROM items WHERE id = ?", item, (error2, results2, fields2) => {
+                                if(error2) throw error2;
+                                P2EquippedItemsDefenseValue = P2EquippedItemsDefenseValue + results2[0].bonus_defense;
+                                thisMatch.setPlayer2Defense(results[0].defense + P2EquippedItemsDefenseValue);
+                                console.log("Set Player2 Defense to: " + thisMatch.getPlayer2Defense());
+                                this.player2DefenseInitialized = true;
+                            })
+                        } else {
+                            thisMatch.setPlayer2Defense(results[0].defense + P2EquippedItemsDefenseValue);
+                            console.log("Set Player2 Defense to: " + thisMatch.getPlayer2Defense());
+                            this.player2DefenseInitialized = true;
+                        }
+                    });
+                })
+                console.log(this.getPlayer2Defense());
+
+                var flip = Math.random();
+                if(flip < 0.5){
+                    this.whoHasTurn = this.player1;
+                    io.to(this.getMatchID()).emit("newBattleLogMessage", this.player1.username + " has the first turn!");
+                } else if(flip > 0.5){
+                    this.whoHasTurn = this.player2;
+                    io.to(this.getMatchID()).emit("newBattleLogMessage", this.player2.username + " has the first turn!");
+                } else if(flip == 0.5){
+                    console.log("Flipped: " + flip + ". Reflip!");
+                    flip = Math.random();
+                    if(flip < 0.5){
+                        this.whoHasTurn = this.player1;
+                        io.to(this.getMatchID()).emit("newBattleLogMessage", this.player1.username + " has the first turn!");
+                    } else if(flip > 0.5){
+                        this.whoHasTurn = this.player2;
+                        io.to(this.getMatchID()).emit("newBattleLogMessage", this.player2.username + " has the first turn!");
+                    } else {
+                        this.whoHasTurn = this.player2;
+                        io.to(this.getMatchID()).emit("newBattleLogMessage", this.player2.username + " has the first turn!");
+                    }
+                }
+
+                setInterval(()=>{
+                    if(this.player1HealthInitialized && this.player1DamageInitialized && this.player2HealthInitialized && this.player2DamageInitialized){
+                        this.hasMatchStarted = true;
+                        if(!this.isMatchFinished){
+                            if(this.getPlayer1CurrentHealth() > 0 && this.getPlayer2CurrentHealth() > 0){
+                                if(this.whoHasTurn == this.player1){
+                                    this.doDamagePlayer1(this.getPlayer1Damage(), io);
+                                    if(equippedItemsP1.includes(16)){ // Heal by 250 if Dagger of Lifebinder is equipped
+                                        this.receiveHealingPlayer1(250, io)
+                                    }
+                                    this.whoHasTurn = this.player2;
+                                } else if(this.whoHasTurn == this.player2){
+                                    this.doDamagePlayer2(this.getPlayer2Damage(), io);
+                                    if(equippedItemsP2.includes(16)){ // Heal by 250 if Dagger of Lifebinder is equipped
+                                        this.receiveHealingPlayer2(250, io)
+                                    }
+                                    this.whoHasTurn = this.player1;
+                                } else {
+                                    console.log("NOBODY HAS TURN ERROR!");
+                                }
+                            } else {
+                                if(this.getPlayer2CurrentHealth() <= 0){ // When Player1 Wins
+                                    io.to(thisMatch.getMatchID()).emit("sendAlert", thisMatch.player1.username + " has won the Game!");
+                                    io.to(thisMatch.getMatchID()).emit("redirectToPVPLobby");
+                                    for( var i = 0; i < pvpMatches.length; i++){ 
+    
+                                        if ( pvpMatches[i] === this) { 
+                                    
+                                            pvpMatches.splice(i, 1);
+                                        }
+                                    
+                                    }
+                                    // Player 1 Awards
+                                    con.query("SELECT * FROM characters WHERE name = ?", thisMatch.player1.username, (error, results, fields) => {
+                                        if(error) throw error;
+                                        con.query("UPDATE characters SET pvpcr = ? WHERE id = ?", [results[0].pvpcr + 25, results[0].id], (error2, results2, fields2) => {
+                                            if(error2) throw error2;
+                                            var message = "Won against <span style='color: yellow;'>" + thisMatch.player2.username + "</span> in PVP Combat and gained <span style='color: green;'>" + 25 + "</span> CR";
+                                            con.query("INSERT INTO inbox_messages (id, characterid, message, timestamp) VALUES (NULL, ?, ?, '" + new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + "')", [results[0].id, message], (error3, results3, fields3) => {
+                                                if(error3) throw error3;
+                                            })
+                                        })
+                                    })
+
+                                    // Player 2 Loses
+                                    con.query("SELECT * FROM characters WHERE name = ?", thisMatch.player2.username, (error, results, fields) => {
+                                        if(error) throw error;
+                                        if((results[0].pvpcr - 25) >= 0){
+                                            con.query("UPDATE characters SET pvpcr = ? WHERE id = ?", [results[0].pvpcr - 25, results[0].id], (error2, results2, fields2) => {
+                                                if(error2) throw error2;
+                                                var message = "Lost against <span style='color: yellow;'>" + thisMatch.player1.username + "</span> in PVP Combat and lost <span style='color: red;'>" + 25 + "</span> CR";
+                                                con.query("INSERT INTO inbox_messages (id, characterid, message, timestamp) VALUES (NULL, ?, ?, '" + new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + "')", [results[0].id, message], (error3, results3, fields3) => {
+                                                    if(error3) throw error3;
+                                                    this.isMatchFinished = true;
+                                                })
+                                            })
+                                        } else {
+                                            con.query("UPDATE characters SET pvpcr = ? WHERE id = ?", [0, results[0].id], (error2, results2, fields2) => {
+                                                if(error2) throw error2;
+                                                var message = "Lost against <span style='color: yellow;'>" + thisMatch.player1.username + "</span> in PVP Combat and lost <span style='color: red;'>" + 25 + "</span> CR";
+                                                
+                                                con.query("INSERT INTO inbox_messages (id, characterid, message, timestamp) VALUES (NULL, ?, ?, '" + new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + "')", [results[0].id, message], (error3, results3, fields3) => {
+                                                    if(error3) throw error3;
+                                                    this.isMatchFinished = true;
+                                                })
+                                            })
+                                        }
+                                    })
+
+                                    delete this;
+                                } else if(this.getPlayer1CurrentHealth() <= 0){ // When Player2 Wins
+                                    io.to(thisMatch.getMatchID()).emit("sendAlert", thisMatch.player2.username + " has won the Game!");
+                                    io.to(thisMatch.getMatchID()).emit("redirectToPVPLobby");
+                                    for( var i = 0; i < pvpMatches.length; i++){ 
+    
+                                        if ( pvpMatches[i] === this) { 
+                                    
+                                            pvpMatches.splice(i, 1);
+                                        }
+                                    
+                                    }
+                                    // Player 2 Awards
+                                    con.query("SELECT * FROM characters WHERE name = ?", thisMatch.player2.username, (error, results, fields) => {
+                                        if(error) throw error;
+                                        con.query("UPDATE characters SET pvpcr = ? WHERE id = ?", [results[0].pvpcr + 25, results[0].id], (error2, results2, fields2) => {
+                                            if(error2) throw error2;
+                                            var message = "Won against <span style='color: yellow;'>" + thisMatch.player1.username + "</span> in PVP Combat and gained <span style='color: green;'>" + 25 + "</span> CR";
+                                            con.query("INSERT INTO inbox_messages (id, characterid, message, timestamp) VALUES (NULL, ?, ?, '" + new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + "')", [results[0].id, message], (error3, results3, fields3) => {
+                                                if(error3) throw error3;
+                                                this.isMatchFinished = true;
+                                            })
+                                        })
+                                    })
+
+                                    // Player 1 Loses
+                                    con.query("SELECT * FROM characters WHERE name = ?", thisMatch.player1.username, (error, results, fields) => {
+                                        if(error) throw error;
+                                        if((results[0].pvpcr - 25) >= 0){
+                                            con.query("UPDATE characters SET pvpcr = ? WHERE id = ?", [results[0].pvpcr - 25, results[0].id], (error2, results2, fields2) => {
+                                                if(error2) throw error2;
+                                                var message = "Lost against <span style='color: yellow;'>" + thisMatch.player2.username + "</span> in PVP Combat and lost <span style='color: red;'>" + 25 + "</span> CR";
+                                                
+                                                con.query("INSERT INTO inbox_messages (id, characterid, message, timestamp) VALUES (NULL, ?, ?, '" + new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + "')", [results[0].id, message], (error3, results3, fields3) => {
+                                                    if(error3) throw error3;
+                                                    this.isMatchFinished = true;
+                                                })
+                                            })
+                                        } else {
+                                            con.query("UPDATE characters SET pvpcr = ? WHERE id = ?", [0, results[0].id], (error2, results2, fields2) => {
+                                                if(error2) throw error2;
+                                                var message = "Lost against <span style='color: yellow;'>" + thisMatch.player2.username + "</span> in PVP Combat and lost <span style='color: red;'>" + 25 + "</span> CR";
+                                                
+                                                con.query("INSERT INTO inbox_messages (id, characterid, message, timestamp) VALUES (NULL, ?, ?, '" + new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + "')", [results[0].id, message], (error3, results3, fields3) => {
+                                                    if(error3) throw error3;
+                                                    this.isMatchFinished = true;
+                                                })
+                                            })
+                                        }
+                                    })
+
+                                    delete this;
+                                }
+                            }
+                            if(this.matchDefenseFactorIncreaseCounter >= 1){
+                                this.matchDefenseFactor = this.matchDefenseFactor - 1;
+                                this.matchDefenseFactorIncreaseCounter = 0;
+                            }
+                            this.matchDefenseFactorIncreaseCounter = this.matchDefenseFactorIncreaseCounter + 1;
+                            io.to(thisMatch.getMatchID()).emit("updateDefenseValueText", this.matchDefenseFactor);
+                            io.to(thisMatch.getMatchID()).emit("receiveP1Health", this.getPlayer1CurrentHealth(), this.getPlayer1MaxHealth());
+                            io.to(thisMatch.getMatchID()).emit("receiveP2Health", this.getPlayer2CurrentHealth(), this.getPlayer2MaxHealth());
+                        }
+                    }
+                },1500)
+                
+            }
+        }
+
         // Socket io Connection
         io.sockets.on('connection', (socket) => {
             console.log('a user connected');
@@ -186,7 +643,7 @@ class Gameserver {
                                 if (error) throw error;
                                 console.log(results[0].id);
                             
-                            con.query('INSERT INTO `characters` (`id`, `name`, `code`, `level`, `portrait`, `class`, `attackpower`, `health`, `defense`, `pvpcr`) VALUES (?, ?, ?, 1, ?, ?, 100, 100, 100, 0);', [results[0].id + 1, characterName, hash, characterPortrait, characterClass], function(error2, results2, fields2) {
+                            con.query('INSERT INTO `characters` (`id`, `name`, `code`, `level`, `portrait`, `class`, `attackpower`, `health`, `defense`, `pvpcr`) VALUES (?, ?, ?, 1, ?, ?, 100, 100, 1000, 0);', [results[0].id + 1, characterName, hash, characterPortrait, characterClass], function(error2, results2, fields2) {
                                 if (error2) throw error2;
                                 console.log("Created new character!");
                             })
@@ -274,8 +731,6 @@ class Gameserver {
             })
 
             socket.on("joinedTheBattle", () => {
-                console.log(pvpMatches);
-                console.log(socket);
                 pvpMatches.forEach(match => {
                     if(match.player1.username == socket.username || match.player2.username == socket.username){
                         if(match.player1.username  == socket.username){
@@ -287,6 +742,7 @@ class Gameserver {
                             socket.join(match.getMatchID());
                         }
                         if(match.bothPlayersJoined()){
+                            io.to(match.getMatchID()).emit("matchStarted");
                             con.query("SELECT * FROM characters WHERE name = ?", match.player1.username, (error, results, fields) => {
                                 if(error) throw error;
                                 var equippedItemsP1 = [results[0].equipped_head, results[0].equipped_chest, results[0].equipped_leg, results[0].equipped_hand, results[0].equipped_boot, results[0].equipped_weapon];
@@ -298,6 +754,9 @@ class Gameserver {
                                     return;
                                 })
                             })
+                            if(!match.hasMatchStarted && !match.isMatchFinished){
+                                match.initBothPlayers(io);
+                            }
                         }
                     } else {
                         console.log("None of the socket ids matched");
@@ -347,8 +806,12 @@ class Gameserver {
 
             setInterval(() => {
                 if(pvpQueue.length > 1){
-                    io.to(pvpQueue[0].id).emit("matchIsReady");
-                    io.to(pvpQueue[1].id).emit("matchIsReady");
+                    var p1ID = pvpQueue[0].id;
+                    var p2ID = pvpQueue[1].id;
+
+                    setInterval( () => {io.to(p1ID).emit("matchIsReady");}, 1000);
+                    setInterval( () => {io.to(p2ID).emit("matchIsReady");}, 2500);
+                    
                     var gameName = pvpQueue[0].id + "-" + pvpQueue[1].id;
                     console.log(pvpQueue[0].username + " and " + pvpQueue[1].username + " have been added to " + gameName);
                     var match = new PVPMatch(pvpQueue[0].id + "-" + pvpQueue[1].id, pvpQueue[0], pvpQueue[1]);

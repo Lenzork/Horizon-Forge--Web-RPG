@@ -214,8 +214,7 @@ socket.on("readyToRenderPVPRanks", () => {
     readyToRenderPVPRanks = true;
 });
 
-socket.on("matchIsReady", () => {
-    alert("MATCH IS READY!");
+socket.on("matchIsReady", (time) => {
     window.location.replace("pvp/battlefield");
 })
 

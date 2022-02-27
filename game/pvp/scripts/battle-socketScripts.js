@@ -3,6 +3,7 @@ var socket = io.connect();
 var PVPMatchID;
 var characters = [];
 var onTurn = 0;
+var matchStarted = false;
 
 class Character {
     constructor(characterId, characterName, characterLevel, characterClass, characterPortrait, characterAttackpower, characterHealth, characterDefense, characterPvpCR, title, equippedItems){
@@ -233,14 +234,60 @@ socket.on("receiveP2Portrait", (portrait) => {
     
 })
 
-socket.on("receiveP1Health", (value) => {
+socket.on("receiveP1Health", (value, MaxValue) => {
     var P1HealthText = document.getElementById("p1HealthText");
+    P1HealthText.innerHTML = value + " / " + MaxValue;
+
+    var P1Healthbar = document.getElementById("p1HealthBar");
+    P1Healthbar.value = (value / MaxValue);
+
 })
 
-socket.on("receiveP2Health", (value) => {
+socket.on("receiveP2Health", (value, MaxValue) => {
     var P2HealthText = document.getElementById("p2HealthText");
+    P2HealthText.innerHTML = value + " / " + MaxValue;
+
+    var P2Healthbar = document.getElementById("p2HealthBar");
+    P2Healthbar.value = (value / MaxValue);
 
 })
+
+socket.on("newBattleLogMessage", (message) => {
+    var battleLogObject = document.getElementById("battleLog");
+    var newMessageObject = document.createElement("div");
+    newMessageObject.className = "BattleLogMessage";
+    newMessageObject.innerHTML = message;
+    battleLogObject.insertBefore(newMessageObject, battleLogObject.firstChild);
+})
+
+socket.on("updateDefenseValueText", (value) => {
+    var getText = document.getElementById("defenseValueText");
+    getText.innerHTML = Math.round(value);
+})
+
+socket.on("sendAlert", (receivingMessage) => {
+    alert(receivingMessage);
+});
+
+socket.on("redirectToPVPLobby", () => {
+    setTimeout(() => {
+        window.location.replace("/pvp");}
+    , 1000);
+})
+
+myInterval = setInterval(() => {
+    if(!matchStarted){
+        console.log("Sending..");
+        socket.emit("joinedTheBattle");
+    }
+}, 1000);
+
+socket.on("matchStarted", () => {
+    matchStarted = true;
+    clearInterval(myInterval);
+})
+
+myInterval
 
 // Item sockets
 socket.on("receiveItemStrengthValueP1", (value) => {
@@ -268,34 +315,3 @@ socket.on("receiveItemHealthValueP2", (value) => {
 socket.on("receiveItemDefenseValueP2", (value) => {
     characters[1].addEquippedItemsDefenseValue(value);
 })
-
-setInterval(()=>{
-    var P1HealthText = document.getElementById("p1HealthText");
-    P1HealthText.innerHTML = characters[0].getCharacterRealHealth() + " / " + characters[0].getCharacterRealMaxHealth();
-
-    var P2HealthText = document.getElementById("p2HealthText");
-    P2HealthText.innerHTML = characters[1].getCharacterRealHealth() + " / " + characters[1].getCharacterRealMaxHealth();
-
-    var P1Healthbar = document.getElementById("p1HealthBar");
-    P1Healthbar.value = (characters[0].getCharacterRealHealth() / characters[0].getCharacterRealMaxHealth());
-
-    var P2Healthbar = document.getElementById("p2HealthBar");
-    P2Healthbar.value = (characters[1].getCharacterRealHealth() / characters[1].getCharacterRealMaxHealth());
-
-
-    if(characters[0].getCharacterRealHealth() >= 1 && characters[1].getCharacterRealHealth() >= 1){
-        console.log("Läuft noch!");
-        if(onTurn == 0){
-            characters[0].doDamage(characters[0].getCharacterRealStrength(), characters[1]);
-            onTurn = 1;
-        } else if(onTurn == 1){
-            characters[0].doDamage(characters[1].getCharacterRealStrength(), characters[0]);
-            onTurn = 0;
-        }
-        if(characters[0].getCharacterRealHealth() <= 0 || characters[1].getCharacterRealHealth() <= 0){
-            console.log("Game over!");
-        }
-    } else {
-        console.log("Game over!");
-    }
-},1500)
