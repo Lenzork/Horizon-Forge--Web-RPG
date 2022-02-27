@@ -5,9 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Horizon Forge: Web RPG => Game</title>
-    <link rel="stylesheet" href="/css/inbox-stylesheet.css">
+    <link rel="stylesheet" href="/css/pvp-stylesheet.css">
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/scripts/inbox-socketScripts.js"></script>
+    <script src="/scripts/pvp-socketScripts.js"></script>
 </head>
 <body>
     <div class="left-div">
@@ -17,9 +17,9 @@
             <a href="/game"><div class="div1"><h1>My Character</h1></div></a>
             <a href="/inventory"><div class="div2"><h1>Inventory</h1></div></a>
             <a href="/marketplace"><div class="div3"><h1>Marketplace</h1></div></a>
-            <a href="/pvp"><div class="div4"><h1>PVP</h1></div></a>
+            <div class="div4"><h1>PVP</h1></div>
             <div class="div5"><h1>Missions</h1></div>
-            <div class="div7"><h1>Inbox</h1></div>
+            <a href="../inbox/"><div class="div7"><h1>Inbox</h1></div></a>
             <div class="div6"><h1>Options</h1></div>
         </div>
         <div class="version-text">ALPHA VERSION</div>
@@ -27,11 +27,18 @@
     </div>
     <div class="middle-div">
     <center>
-        <h1>Inbox</h1>
-        <div class="inboxGrid" id="inboxGrid" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <h1>PVP</h1>
+        <div class="playerRank-info">
+            <h3>Your Rank:</h3>
+            <img title="Character Portrait" id="PVPRankIcon" src="../images/ranks/Rank1_1.png">
+            <p class="PVPRankNameText" id="PVPRankName"></p>
+            <p class="PVPRankCRText" id="PVPRankCR"></p>
         </div>
-        <div class="inbox-item" style="display: none;"><p class="inbox-item-message"></p><hr><p class="inbox-item-timestamp"></p></div>
-        
+        <br>
+        <div class="pvpBoard"><center>
+            <h1 class="peopleInQueueText" id="peopleInQueueText">People in Queue: 0</h1>
+            <button class="joinQueueButton" id="joinQueueButton">Join Queue</button>
+        </center></div>
     </center>
     </div>
 </body>

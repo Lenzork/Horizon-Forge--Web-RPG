@@ -11,7 +11,54 @@ var config = require('./config/config');
 // Server Array to get the list of Servers and their Informations
 servers = [];
 
+// PVP Queue Array
+pvpQueue = [];
+
+// PVP Matches Array
+pvpMatches = [];
+
 // Gameserver Class to store all of the needed Informations into one Object
+class PVPMatch {
+    constructor(matchID, player1, player2){
+        this.matchID = matchID;
+        this.player1 = player1;
+        this.player2 = player2;
+
+        this.player1Joined = false;
+        this.player2Joined = false;
+
+        this.started = false;
+    }
+
+    setPlayer1Joined(bool){
+        this.player1Joined = bool;
+    }
+
+    setPlayer2Joined(bool){
+        this.player2Joined = bool;
+    }
+
+    returnPlayer1(){
+        return this.player1;
+    }
+
+    returnPlayer2(){
+        return this.player2;
+    }
+
+    bothPlayersJoined(){
+        if(this.player1Joined == true && this.player2Joined == true){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    getMatchID(){
+        return this.matchID
+    }
+}
+
 class Gameserver {
     constructor(name, slots, port) {
         this.id = servers.length;
@@ -55,6 +102,7 @@ class Gameserver {
         ServerApp.use(ServerExpress.static(path.join(__dirname + '/game/inventory')));
         ServerApp.use(ServerExpress.static(path.join(__dirname + '/game/marketplace')));
         ServerApp.use(ServerExpress.static(path.join(__dirname + '/game/inbox')));
+        ServerApp.use(ServerExpress.static(path.join(__dirname + '/game/pvp')));
 
         ServerApp.get('/', (req, res) => {
             res.render(path.join(__dirname + '/index.html'));
@@ -167,6 +215,17 @@ class Gameserver {
                 })
                 io.to(socket.id).emit("readyToRenderPVPRanks");
             })
+            
+            socket.on("pvpHubJoin", () => {
+                // Getting character information
+                con.query("SELECT * FROM characters WHERE name = ?", socket.username, function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results);
+                    var itemRarities = [];
+                    var equippedItems = [results[0].equipped_head, results[0].equipped_chest, results[0].equipped_leg, results[0].equipped_hand, results[0].equipped_boot, results[0].equipped_weapon];
+                    io.to(socket.id).emit("loginVerification", results[0].id, results[0].name, results[0].level, results[0].class, results[0].portrait, results[0].attackpower, results[0].health, results[0].defense, itemRarities, results[0].pvpcr, results[0].title, equippedItems);
+                })
+            })
 
             socket.on("getUserTitles", () => {
                 con.query('SELECT * FROM titles', function(error, results, fields) {
@@ -186,6 +245,121 @@ class Gameserver {
                     io.to(socket.id).emit("receiveItemDefenseValue", results[0].bonus_defense);
                 })
             })
+
+            socket.on("getBattleItemsP1", (matchID, id) => {
+                con.query("SELECT * FROM items WHERE id = ?", id, (error, results, fields) => {
+                    if(error) throw error;
+                    io.to(socket.id).emit("receiveItemStrengthValueP1", results[0].bonus_damage, 0);
+                    io.to(socket.id).emit("receiveItemHealthValueP1", results[0].bonus_health, 0);
+                    io.to(socket.id).emit("receiveItemDefenseValueP1", results[0].bonus_defense, 0);
+                })
+            })
+
+            socket.on("getBattleItemsP2", (matchID, id) => {
+                con.query("SELECT * FROM items WHERE id = ?", id, (error, results, fields) => {
+                    if(error) throw error;
+                    io.to(socket.id).emit("receiveItemStrengthValueP2", results[0].bonus_damage);
+                    io.to(socket.id).emit("receiveItemHealthValueP2", results[0].bonus_health);
+                    io.to(socket.id).emit("receiveItemDefenseValueP2", results[0].bonus_defense);
+                })
+            })
+
+            socket.on("joinPVPQueue", () => {
+                if(!pvpQueue.includes(socket)){
+                    pvpQueue.push(socket);
+                    console.log("Added " + socket.username + " into the PVP queue (Players in Queue: " + pvpQueue.length + ")");
+                }
+
+                io.emit("getPVPQueueAmount", pvpQueue.length);
+            })
+
+            socket.on("joinedTheBattle", () => {
+                console.log(pvpMatches);
+                console.log(socket);
+                pvpMatches.forEach(match => {
+                    if(match.player1.username == socket.username || match.player2.username == socket.username){
+                        if(match.player1.username  == socket.username){
+                            match.setPlayer1Joined(true);
+                            socket.join(match.getMatchID());
+                    
+                        } else if(match.player2.username  == socket.username){
+                            match.setPlayer2Joined(true);
+                            socket.join(match.getMatchID());
+                        }
+                        if(match.bothPlayersJoined()){
+                            con.query("SELECT * FROM characters WHERE name = ?", match.player1.username, (error, results, fields) => {
+                                if(error) throw error;
+                                var equippedItemsP1 = [results[0].equipped_head, results[0].equipped_chest, results[0].equipped_leg, results[0].equipped_hand, results[0].equipped_boot, results[0].equipped_weapon];
+                                con.query("SELECT * FROM characters WHERE name = ?", match.player2.username, (error2, results2, fields) => {
+                                    if(error2) throw error2;
+                                    var equippedItemsP2 = [results2[0].equipped_head, results2[0].equipped_chest, results2[0].equipped_leg, results2[0].equipped_hand, results2[0].equipped_boot, results2[0].equipped_weapon];
+                                    io.to(match.getMatchID()).emit("matchStart", match.matchID, results[0].id, results2[0].id, results[0].name, results2[0].name, results[0].level, results2[0].level, results[0].class, results2[0].class, results[0].portrait, results2[0].portrait, results[0].attackpower, results2[0].attackpower, results[0].health, results2[0].health, results[0].defense, results2[0].defense, results[0].pvpcr, results2[0].pvpcr, results[0].title, results2[0].title, equippedItemsP1, equippedItemsP2);
+                                    console.log("Both of " + match.matchID + " joined!");
+                                    return;
+                                })
+                            })
+                        }
+                    } else {
+                        console.log("None of the socket ids matched");
+                    }
+                });
+            })
+
+            socket.on("reqP1Portrait", (matchID, p1Username) => {
+                con.query("SELECT id FROM characters WHERE name = ?", p1Username, (error, results, fields) => {
+                    if(error) throw error;
+                    con.query("SELECT * FROM characters WHERE id = ?", results[0].id, (error2, results2, fields2) => {
+                        if(error2) throw error2;
+                        io.to(matchID).emit("receiveP1Portrait", results2[0].portrait);
+                    })
+                });
+            })
+
+            socket.on("reqP2Portrait", (matchID, p2Username) => {
+                con.query("SELECT id FROM characters WHERE name = ?", p2Username, (error, results, fields) => {
+                    if(error) throw error;
+                    con.query("SELECT * FROM characters WHERE id = ?", results[0].id, (error2, results2, fields2) => {
+                        if(error2) throw error2;
+                        io.to(matchID).emit("receiveP2Portrait", results2[0].portrait);
+                    })
+                });
+            })
+
+            socket.on("reqP1Health", (matchID, p1Username) => {
+                con.query("SELECT id FROM characters WHERE name = ?", p1Username, (error, results, fields) => {
+                    if(error) throw error;
+                    con.query("SELECT * FROM characters WHERE id = ?", results[0].id, (error2, results2, fields2) => {
+                        if(error2) throw error2;
+                        io.to(matchID).emit("receiveP1Health", results2[0].health);
+                    })
+                });
+            })
+
+            socket.on("reqP2Health", (matchID, p2Username) => {
+                con.query("SELECT id FROM characters WHERE name = ?", p2Username, (error, results, fields) => {
+                    if(error) throw error;
+                    con.query("SELECT * FROM characters WHERE id = ?", results[0].id, (error2, results2, fields2) => {
+                        if(error2) throw error2;
+                        io.to(matchID).emit("receiveP2Health", results2[0].health);
+                    })
+                });
+            })
+
+            setInterval(() => {
+                if(pvpQueue.length > 1){
+                    io.to(pvpQueue[0].id).emit("matchIsReady");
+                    io.to(pvpQueue[1].id).emit("matchIsReady");
+                    var gameName = pvpQueue[0].id + "-" + pvpQueue[1].id;
+                    console.log(pvpQueue[0].username + " and " + pvpQueue[1].username + " have been added to " + gameName);
+                    var match = new PVPMatch(pvpQueue[0].id + "-" + pvpQueue[1].id, pvpQueue[0], pvpQueue[1]);
+                    pvpMatches.push(match);
+
+                    pvpQueue.shift();
+                    pvpQueue.shift();
+                }
+            }, 1000);
+
+            socket.on("getPVPQueueAmount", () => {io.to(socket.id).emit("getPVPQueueAmount", pvpQueue.length);})
 
             socket.on("joinedGame", () => {
                 socket.join("ingame");
@@ -648,6 +822,12 @@ class Gameserver {
             })
 
             socket.on('disconnect', () => {
+                for( var i = 0; i < pvpQueue.length; i++){ 
+                    if ( pvpQueue[i] === socket) { 
+                
+                        pvpQueue.splice(i, 1); 
+                    }
+                }
             });            
         });
 
@@ -780,6 +960,50 @@ class Gameserver {
                 // Output username
                 console.log("true");
                 response.render(__dirname + "/game/inbox/index.html");
+
+                let username = request.session.username;
+                
+
+                io.sockets.on('connection', (socket) => {
+                    socket.username = username;
+                    
+                });
+            } else {
+                // Not logged in
+                response.redirect('../');
+                console.log("false");
+            }
+            response.end();
+        });
+
+        ServerApp.get('/pvp', function(request, response) {
+            // If the user is loggedin
+            if (request.session.loggedin) {
+                // Output username
+                console.log("true");
+                response.render(__dirname + "/game/pvp/index.html");
+
+                let username = request.session.username;
+                
+
+                io.sockets.on('connection', (socket) => {
+                    socket.username = username;
+                    
+                });
+            } else {
+                // Not logged in
+                response.redirect('../');
+                console.log("false");
+            }
+            response.end();
+        });
+
+        ServerApp.get('/pvp/battlefield', function(request, response) {
+            // If the user is loggedin
+            if (request.session.loggedin) {
+                // Output username
+                console.log("true");
+                response.render(__dirname + "/game/pvp/battlefield.html");
 
                 let username = request.session.username;
                 

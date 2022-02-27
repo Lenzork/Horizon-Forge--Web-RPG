@@ -1,0 +1,84 @@
+/* The Modal (background) */
+.modal {
+    display: block; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+  
+  /* Modal Content/Box */
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    display: inline-block;
+  }
+  
+  /* The Close Button */
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+body {
+    margin:0;
+    height: 100%;
+    font-family: Century Gothic;
+    /*background-image: url("../images/backgrounds/game_background_4.png");*/
+    background-image: url("../../images/textures/bricks/Bricks_23-512x512.png");
+    background-position: center top;
+}
+
+body hr {
+    width: 50%;
+    border-radius: 75%;
+    box-shadow: 0 0 3px 1px rgb(43, 43, 43);
+}
+
+.div-left {
+
+    float: left;
+}
+
+.div-right {
+
+    float: right;
+}
+
+.healthbar {
+    background-color: black;
+    width: 512px;
+}
+
+.healthbar::-moz-progress-bar { background: rgb(255, 0, 0); }
+.healthbar::-webkit-progress-value { background: rgb(255, 0, 0)255); }
+.healthbar { color: rgb(255, 0, 0); }
+
+.battleLog {
+    background-color: rgba(0, 0, 0, 0.7);
+    position: absolute;
+    border: 1px solid white;
+    width: 45%;
+    height: 500px;
+    bottom: 0;
+    margin: auto;
+    left: 0;
+    right: 0;
+}

@@ -1,14 +1,12 @@
+/* Make a socket connection */
 var socket = io.connect();
-var characterID = null;
+
+/* LOCAL VARIABLES */
 var pvpRanks = [];
-var titles = [];
 var readyToRenderPVPRanks = false;
-var readyToRenderTitle = false;
 var localPlayer;
 
-// ----------------------------------------------------------------
-// Character Class 
-// ----------------------------------------------------------------
+/* CLASSES */
 class Character {
     constructor(characterId, characterName, characterLevel, characterClass, characterPortrait, characterAttackpower, characterHealth, characterDefense, characterPvpCR, title, equippedItems){
         this.characterId = characterId;
@@ -195,33 +193,7 @@ function pushPVPRanks(item){
     pvpRanks.push(item);
 }
 
-// ----------------------------------------------------------------
-// Titles
-// ----------------------------------------------------------------
-class Title {
-    constructor(id, title){
-        this.id = id;
-        this.title = title;
-    }
-
-    getTitle(){
-        return this.title;
-    }
-
-    getTitleWithCharacterName(characterName, before){
-        if(before){
-            return this.title + " " + characterName
-        }
-        if(!before){
-            return characterName + " " + this.title;
-        }
-    }
-}
-
-function pushTitles(item){
-    titles.push(item);
-}
-
+/* SOCKETS */
 socket.on("createNewPVPRank", (id, name, icon, mincr) => {
     var newRank = new PvpRank(id, name, icon, mincr);
     pushPVPRanks(newRank);
@@ -238,79 +210,37 @@ socket.on("createNewPVPRank", (id, name, icon, mincr) => {
     }
 });
 
-socket.on("setReadyToRenderTitle", () => {
-    readyToRenderTitle = true;
-})
-
-socket.on("receiveTitle", (id, title) => {
-    var newTitle = new Title(id, title);
-
-    pushTitles(newTitle);
-
-    console.log(titles);
-    if(readyToRenderTitle){
-        var characterNameText = document.getElementById("characterName");
-
-        characterNameText.innerHTML = localPlayer.getEquippedCharacterTitleText();
-    }
-})
-
-// Join Game call to Server
-socket.emit("joinedGame");
-
-// Verification for the Server Room
-socket.on("RoomsVerification", (param) => {console.log(param)});
-
-socket.emit("getPVPRanks");
-
-socket.emit("getUserTitles");
-
 socket.on("readyToRenderPVPRanks", () => {
     readyToRenderPVPRanks = true;
 });
 
-// Item sockets
-socket.on("receiveItemStrengthValue", (value) => {
-    localPlayer.addEquippedItemsStrengthValue(value);
+socket.on("matchIsReady", () => {
+    alert("MATCH IS READY!");
+    window.location.replace("pvp/battlefield");
 })
 
-socket.on("receiveItemHealthValue", (value) => {
-    localPlayer.addEquippedItemsHealthValue(value);
-})
-
-socket.on("receiveItemDefenseValue", (value) => {
-    localPlayer.addEquippedItemsDefenseValue(value);
-})
-
-// Setting all the Elements with the Data from the Database
 socket.on("loginVerification", (characterId, characterName, characterLevel, characterClass, characterPortrait, characterAttackpower, characterHealth, characterDefense, itemRarities, characterPvpCR, title, equippedItems) => {
     var playerCharacter = new Character(characterId, characterName, characterLevel, characterClass, characterPortrait, characterAttackpower, characterHealth, characterDefense, characterPvpCR, title, equippedItems)
     
     localPlayer = playerCharacter;
-    var characterNameText = document.getElementById("characterName");
-    var characterPortraitImg = document.getElementById("characterPortrait");
-    var characterStrengthValueText = document.getElementById("characterStrengthValue");
-    var characterHealthValueText = document.getElementById("characterHealthValue");
-    var characterDefenseValueText = document.getElementById("characterDefenseValue");
-    var characterInfoText = document.getElementById("character-Class-Level");
 
-    characterID = characterId;
-
-    // Set the Element properties
-    characterNameText.innerHTML = playerCharacter.characterName;
-    characterInfoText.innerHTML =  playerCharacter.characterClass + " - Level " + playerCharacter.characterLevel;
-    characterPortraitImg.src = "../images/portraits/" + playerCharacter.characterPortrait;
-    characterStrengthValueText.innerHTML = playerCharacter.characterAttackpower;
-    characterHealthValueText.innerHTML = playerCharacter.characterHealth;
-    characterDefenseValueText.innerHTML = playerCharacter.characterDefense;
 
     localPlayer.getCharacterStrength();
+    socket.emit("getPVPRanks");
 
-    console.log("Works!");
+    var joinQueueButton = document.getElementById("joinQueueButton");
+    joinQueueButton.addEventListener("click", () => {
+        console.log("Joining Queue...");
+        socket.emit("joinPVPQueue");
+    })
 })
 
-
-
-socket.on("getCharacterInformations", () => {
-    console.log("Test");
+socket.on("getPVPQueueAmount", (amount) => {
+    var PVPQueueAmountText = document.getElementById("peopleInQueueText");
+    PVPQueueAmountText.innerHTML = "People in Queue: " + amount;
 })
+/* STARTING REQUESTS */
+
+
+socket.emit("pvpHubJoin");
+socket.emit("getPVPQueueAmount");
