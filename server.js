@@ -120,7 +120,7 @@ class Gameserver {
 
                 this.whoHasTurn = null;
 
-                this.matchDefenseFactor = 1;
+                this.matchDefenseFactor = 100;
                 this.matchDefenseFactorIncreaseCounter = 0;
 
                 /* INIT CHECKS VARIABLES */
