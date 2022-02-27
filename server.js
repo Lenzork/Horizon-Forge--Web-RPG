@@ -120,7 +120,7 @@ class Gameserver {
 
                 this.whoHasTurn = null;
 
-                this.matchDefenseFactor = 100;
+                this.matchDefenseFactor = 1;
                 this.matchDefenseFactorIncreaseCounter = 0;
 
                 /* INIT CHECKS VARIABLES */
@@ -570,8 +570,8 @@ class Gameserver {
                                     delete this;
                                 }
                             }
-                            if(this.matchDefenseFactorIncreaseCounter >= 1){
-                                this.matchDefenseFactor = this.matchDefenseFactor - 1;
+                            if(this.matchDefenseFactorIncreaseCounter > 1){
+                                this.matchDefenseFactor = this.matchDefenseFactor + 1;
                                 this.matchDefenseFactorIncreaseCounter = 0;
                             }
                             this.matchDefenseFactorIncreaseCounter = this.matchDefenseFactorIncreaseCounter + 1;
