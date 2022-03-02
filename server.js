@@ -85,6 +85,52 @@ class Gameserver {
               result.forEach((entry) => {gameserver.addBlacklistedName(entry.name);})
             });
         });
+        
+        class Buff {
+            constructor(id, name, icon, remainingRoundLength){
+                this.id = id;
+                this.name = name;
+                this.icon = icon;
+
+                this.remainingRoundLength = remainingRoundLength;
+
+            }
+
+            initializeOnUI(){
+                /* INITIALIZING TO CLIENTSIDE WITH IO */
+            }
+
+            reduceRoundLength(){
+                this.remainingRoundLength = this.remainingRoundLength - 1;
+                if(this.remainingRoundLength <= 0){
+                    delete this;
+                }
+            }
+
+        }
+
+        class Debuff {
+            constructor(id, name, icon, remainingRoundLength){
+                this.id = id;
+                this.name = name;
+                this.icon = icon;
+
+                this.remainingRoundLength = remainingRoundLength;
+
+            }
+
+            initializeOnUI(){
+                /* INITIALIZING TO CLIENTSIDE WITH IO */
+            }
+
+            reduceRoundLength(){
+                this.remainingRoundLength = this.remainingRoundLength - 1;
+                if(this.remainingRoundLength <= 0){
+                    delete this;
+                }
+            }
+
+        }
 
         // Gameserver Class to store all of the needed Informations into one Object
         class PVPMatch {
@@ -132,6 +178,12 @@ class Gameserver {
                 this.player2DamageInitialized = false;
                 this.player2DefenseInitialized = false;
 
+                /* BUFFS AND DEBUFFS FOR THE FIGHTS */
+                this.player1Buffs = [];
+                this.player1Debuffs = [];
+
+                this.player2Buffs = [];
+                this.player2Debuffs = [];
             }
 
             setPlayer1Joined(bool){
@@ -455,13 +507,21 @@ class Gameserver {
                                 if(this.whoHasTurn == this.player1){
                                     this.doDamagePlayer1(this.getPlayer1Damage(), io);
                                     if(equippedItemsP1.includes(16)){ // Heal by 250 if Dagger of Lifebinder is equipped
-                                        this.receiveHealingPlayer1(250, io)
+                                        this.receiveHealingPlayer1(250, io);
+                                    }
+                                    if(equippedItemsP1.includes(18)){ // Mask of Suffer Equip
+                                        this.receiveDamagePlayer1(150, io);
+                                        this.receiveDamagePlayer2(500, io);
                                     }
                                     this.whoHasTurn = this.player2;
                                 } else if(this.whoHasTurn == this.player2){
                                     this.doDamagePlayer2(this.getPlayer2Damage(), io);
                                     if(equippedItemsP2.includes(16)){ // Heal by 250 if Dagger of Lifebinder is equipped
                                         this.receiveHealingPlayer2(250, io)
+                                    }
+                                    if(equippedItemsP2.includes(18)){ // Mask of Suffer Equip
+                                        this.receiveDamagePlayer2(150, io);
+                                        this.receiveDamagePlayer1(500, io);
                                     }
                                     this.whoHasTurn = this.player1;
                                 } else {
