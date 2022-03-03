@@ -290,7 +290,7 @@ class Gameserver {
                 var damageAfterBlock = value*(this.matchDefenseFactor/(100+this.getPlayer2Defense()));
                 var blockedDamage = damageAfterBlock - value;
                 this.player2CurrentHealth = Math.round(this.player2CurrentHealth - damageAfterBlock);
-                io.to(this.getMatchID()).emit("newBattleLogMessage", this.player2.username + " received <span style='color:red;'>" + Math.round(value) + "</span> (Blocked <span style='color: grey;'>" + Math.round(blockedDamage) + "</span>) damage");
+                io.to(this.getMatchID()).emit("newBattleLogMessage", this.player2.username + " received <span style='color:red;'>" + Math.round(damageAfterBlock) + "</span> (Blocked <span style='color: grey;'>" + Math.round(blockedDamage) + "</span>) damage");
             }
 
             receiveDamageIgnoreArmorPlayer2(value, io){
