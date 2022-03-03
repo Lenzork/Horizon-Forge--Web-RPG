@@ -523,6 +523,20 @@ class Gameserver {
                                         this.receiveDamageIgnoreArmorPlayer1(150, io);
                                         this.receiveDamageIgnoreArmorPlayer2(500, io);
                                     }
+                                    if(equippedItemsP1.includes(19)){
+                                        this.receiveHealingPlayer1(Math.round(this.getPlayer1CurrentHealth()/100*25), io);
+                                    }
+                                    if(equippedItemsP1.includes(20)){
+                                        this.receiveDamageIgnoreArmorPlayer2(this.getPlayer1Damage(), io);
+                                        this.receiveDamageIgnoreArmorPlayer2(this.getPlayer1Damage(), io);
+                                    }
+                                    if(equippedItemsP1.includes(21)){
+                                        this.receiveHealingPlayer1(this.getPlayer2CurrentHealth(), io);
+                                        this.doDamagePlayer1(Math.round(this.getPlayer2MaxHealth()/100*80), io);
+                                    }
+                                    if(equippedItemsP1.includes(22)){
+                                        this.player1Damage = this.player1Damage + (Math.round((this.player1Damage/100)*25));
+                                    }
                                     this.whoHasTurn = this.player2;
                                 } else if(this.whoHasTurn == this.player2){
                                     this.doDamagePlayer2(this.getPlayer2Damage(), io);
@@ -532,6 +546,20 @@ class Gameserver {
                                     if(equippedItemsP2.includes(18)){ // Mask of Suffer Equip
                                         this.receiveDamageIgnoreArmorPlayer2(150, io);
                                         this.receiveDamageIgnoreArmorPlayer1(500, io);
+                                    }
+                                    if(equippedItemsP2.includes(19)){
+                                        this.receiveHealingPlayer2(Math.round(this.getPlayer2CurrentHealth()/100*25), io);
+                                    }
+                                    if(equippedItemsP2.includes(20)){
+                                        this.receiveDamageIgnoreArmorPlayer1(this.getPlayer2Damage(), io);
+                                        this.receiveDamageIgnoreArmorPlayer1(this.getPlayer2Damage(), io);
+                                    }
+                                    if(equippedItemsP2.includes(21)){
+                                        this.receiveHealingPlayer2(this.getPlayer1CurrentHealth(), io);
+                                        this.doDamagePlayer2(Math.round(this.getPlayer1MaxHealth()/100*80), io);
+                                    }
+                                    if(equippedItemsP2.includes(22)){
+                                        this.player2Damage = this.player2Damage + (Math.round((this.player2Damage/100)*25));
                                     }
                                     this.whoHasTurn = this.player1;
                                 } else {
