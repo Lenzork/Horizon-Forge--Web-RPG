@@ -265,6 +265,27 @@ function allowDrop(ev) {
             socket.emit("unequip_weapon", localItems[ev.target.lastChild.id].getItemID());
         }
     }
+    if(ev.target.className == "inventory-item" || ev.target.className == "inventory-item-name" || ev.target.className == "inventory-item-icon"){
+        returnDiv.appendChild(document.getElementById(data));
+        if(localItems[ev.target.lastChild.id].getType() == 0){
+            socket.emit("unequip_head", localItems[ev.target.lastChild.id].getItemID());
+        }
+        if(localItems[ev.target.lastChild.id].getType() == 1){
+            socket.emit("unequip_chest", localItems[ev.target.lastChild.id].getItemID());
+        }
+        if(localItems[ev.target.lastChild.id].getType() == 2){
+            socket.emit("unequip_leg", localItems[ev.target.lastChild.id].getItemID());
+        }
+        if(localItems[ev.target.lastChild.id].getType() == 3){
+            socket.emit("unequip_hand", localItems[ev.target.lastChild.id].getItemID());
+        }
+        if(localItems[ev.target.lastChild.id].getType() == 4){
+            socket.emit("unequip_boot", localItems[ev.target.lastChild.id].getItemID());
+        }
+        if(localItems[ev.target.lastChild.id].getType() == 5){
+            socket.emit("unequip_weapon", localItems[ev.target.lastChild.id].getItemID());
+        }
+    }
 }
 
 function pushLocalItems(item){

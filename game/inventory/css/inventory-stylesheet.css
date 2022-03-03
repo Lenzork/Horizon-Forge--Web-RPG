@@ -237,16 +237,25 @@ html {
 
 .character-equipment {
     display: grid;
-    width: 75%;
+    width: 77%;
     grid-template-columns: repeat(6, 1fr);
     grid-template-rows: repeat(1, 1fr);
     grid-column-gap: 5px;
     grid-row-gap: 0px;
+
+    /* Remove all after this for the old Design - don't forget to delete all the <br>'s in the html file of the Inventory */
+    position: fixed;
+    transform: translateX(41px);
+    padding: 25px;
+    padding-top: 0;
+    background-color: rgb(54, 54, 54);
+    top:0;
+    color: white;
 }
     
 .character-equipment div { 
     width: 100%;
-    height: 150px;
+    height: 200px;
     background-color: rgba(0, 0, 0, 0.5);
     border: 1px solid white;
 }
