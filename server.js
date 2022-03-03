@@ -277,6 +277,11 @@ class Gameserver {
                 io.to(this.getMatchID()).emit("newBattleLogMessage", this.player1.username + " received <span style='color:red;'>" + Math.round(damageAfterBlock) + "</span> (Blocked <span style='color: grey;'>" + Math.round(blockedDamage) + "</span>) damage ");
             }
 
+            receiveDamageIgnoreArmorPlayer1(value, io){
+                this.player1CurrentHealth = Math.round(this.player1CurrentHealth - value);
+                io.to(this.getMatchID()).emit("newBattleLogMessage", this.player1.username + " received <span style='color:red;'>" + Math.round(value) + "</span> (<span style='color:red;'>Ignored any armor'</span>) damage ");
+            }
+
             doDamagePlayer2(value, io){
                 this.receiveDamagePlayer1(value, io);
             }
@@ -285,7 +290,12 @@ class Gameserver {
                 var damageAfterBlock = value*(this.matchDefenseFactor/(100+this.getPlayer2Defense()));
                 var blockedDamage = damageAfterBlock - value;
                 this.player2CurrentHealth = Math.round(this.player2CurrentHealth - damageAfterBlock);
-                io.to(this.getMatchID()).emit("newBattleLogMessage", this.player2.username + " received <span style='color:red;'>" + Math.round(damageAfterBlock) + "</span> (Blocked <span style='color: grey;'>" + Math.round(blockedDamage) + "</span>) damage");
+                io.to(this.getMatchID()).emit("newBattleLogMessage", this.player2.username + " received <span style='color:red;'>" + Math.round(value) + "</span> (Blocked <span style='color: grey;'>" + Math.round(blockedDamage) + "</span>) damage");
+            }
+
+            receiveDamageIgnoreArmorPlayer2(value, io){
+                this.player2CurrentHealth = Math.round(this.player2CurrentHealth - value);
+                io.to(this.getMatchID()).emit("newBattleLogMessage", this.player2.username + " received <span style='color:red;'>" + Math.round(value) + "</span> (<span style='color:red;'>Ignored any armor'</span>) damage ");
             }
 
             receiveHealingPlayer1(value, io){
@@ -510,8 +520,8 @@ class Gameserver {
                                         this.receiveHealingPlayer1(250, io);
                                     }
                                     if(equippedItemsP1.includes(18)){ // Mask of Suffer Equip
-                                        this.receiveDamagePlayer1(150, io);
-                                        this.receiveDamagePlayer2(500, io);
+                                        this.receiveDamageIgnoreArmorPlayer1(150, io);
+                                        this.receiveDamageIgnoreArmorPlayer2(500, io);
                                     }
                                     this.whoHasTurn = this.player2;
                                 } else if(this.whoHasTurn == this.player2){
@@ -520,8 +530,8 @@ class Gameserver {
                                         this.receiveHealingPlayer2(250, io)
                                     }
                                     if(equippedItemsP2.includes(18)){ // Mask of Suffer Equip
-                                        this.receiveDamagePlayer2(150, io);
-                                        this.receiveDamagePlayer1(500, io);
+                                        this.receiveDamageIgnoreArmorPlayer2(150, io);
+                                        this.receiveDamageIgnoreArmorPlayer1(500, io);
                                     }
                                     this.whoHasTurn = this.player1;
                                 } else {
@@ -703,7 +713,7 @@ class Gameserver {
                                 if (error) throw error;
                                 console.log(results[0].id);
                             
-                            con.query('INSERT INTO `characters` (`id`, `name`, `code`, `level`, `portrait`, `class`, `attackpower`, `health`, `defense`, `pvpcr`) VALUES (?, ?, ?, 1, ?, ?, 100, 100, 1000, 0);', [results[0].id + 1, characterName, hash, characterPortrait, characterClass], function(error2, results2, fields2) {
+                            con.query('INSERT INTO `characters` (`id`, `name`, `code`, `level`, `portrait`, `class`, `attackpower`, `health`, `defense`, `pvpcr`) VALUES (?, ?, ?, 1, ?, ?, ' + config.startingAttackPower + ', ' + config.startingHealth + ', ' + config.startingDefense + ', 0);', [results[0].id + 1, characterName, hash, characterPortrait, characterClass], function(error2, results2, fields2) {
                                 if (error2) throw error2;
                                 console.log("Created new character!");
                             })

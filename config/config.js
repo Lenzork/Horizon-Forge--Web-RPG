@@ -46,5 +46,11 @@ config.mysqlDatabaseName[2] = config.serverNames[2]; // Landro
 config.mysqlDatabaseName[3] = config.serverNames[3]; // Valis
 config.mysqlDatabaseName[4] = config.serverNames[4]; // Valhalla
 
+// ----------------------------------------------------------------
+//                   CHARACTER CREATION CONFIG
+// ----------------------------------------------------------------
+config.startingAttackPower = 100;
+config.startingHealth = 100;
+config.startingDefense = 100;
 
 module.exports = config;
