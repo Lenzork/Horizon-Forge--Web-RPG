@@ -280,6 +280,7 @@ socket.on("receiveItemHealthValue", (value) => {
 
 socket.on("receiveItemDefenseValue", (value) => {
     localPlayer.addEquippedItemsDefenseValue(value);
+
 })
 
 // Setting all the Elements with the Data from the Database
