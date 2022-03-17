@@ -5,9 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Horizon Forge: Web RPG => Game</title>
-    <link rel="stylesheet" href="/css/inbox-stylesheet.css">
+    <link rel="stylesheet" href="/css/marketplace-stylesheet.css">
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/scripts/inbox-socketScripts.js"></script>
+    <script src="/scripts/marketplace-socketScripts.js"></script>
 </head>
 <body>
     <div class="left-div">
@@ -16,23 +16,17 @@
             
             <a href="/game"><div class="div1"><h1>My Character</h1></div></a>
             <a href="/inventory"><div class="div2"><h1>Inventory</h1></div></a>
-            <a href="/marketplace"><div class="div3"><h1>Marketplace</h1></div></a>
+            <div class="div3"><h1>Marketplace</h1></div>
             <a href="/pvp"><div class="div4"><h1>PVP</h1></div></a>
-            <a href="/missions"><div class="div5"><h1>Missions</h1></div></a>
-            <div class="div7"><h1>Inbox</h1></div>
+            <div class="div5"><h1>Missions</h1></div>
+            <a href="../inbox/"><div class="div7"><h1>Inbox</h1></div></a>
             <div class="div6"><h1>Options</h1></div>
         </div>
         <div class="version-text">ALPHA VERSION</div>
         </center>
     </div>
     <div class="middle-div">
-    <center>
-        <h1>Inbox</h1>
-        <div class="inboxGrid" id="inboxGrid" ondrop="drop(event)" ondragover="allowDrop(event)">
-        </div>
-        <div class="inbox-item" style="display: none;"><p class="inbox-item-message"></p><hr><p class="inbox-item-timestamp"></p></div>
         
-    </center>
-    </div>
+    </center></div>
 </body>
 </html>

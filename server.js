@@ -1559,6 +1559,28 @@ class Gameserver {
             response.end();
         });
 
+        ServerApp.get('/missions', function (request, response) {
+            // If the user is loggedin
+            if (request.session.loggedin) {
+                // Output username
+                console.log("true");
+                response.render(__dirname + "/game/missions/index.html");
+
+                let username = request.session.username;
+
+
+                io.sockets.on('connection', (socket) => {
+                    socket.username = username;
+
+                });
+            } else {
+                // Not logged in
+                response.redirect('../');
+                console.log("false");
+            }
+            response.end();
+        });
+
         ServerApp.get('/pvp/battlefield', function(request, response) {
             // If the user is loggedin
             if (request.session.loggedin) {
