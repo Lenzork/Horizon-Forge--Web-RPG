@@ -2,8 +2,29 @@ var socket = io.connect();
 var itemRares = null;
 var characterID = null;
 var localItems = [];
+var localPlayer = null;
 var readyToRenderItems = false;
 
+
+// ----------------------------------------------------------------
+// Player Class 
+// ----------------------------------------------------------------
+class Player {
+    constructor(characterId, characterName, characterLevel, characterClass, characterPortrait, characterAttackpower, characterHealth, characterDefense) {
+        this.id = characterId;
+        this.name = characterName;
+        this.level = characterLevel;
+        this.class = characterClass;
+        this.portrait = characterPortrait;
+        this.attackpower = characterAttackpower;
+        this.health = characterHealth;
+        this.defense = characterDefense;
+    }
+
+    getLevel() {
+        return this.level;
+    }
+}
 
 // ----------------------------------------------------------------
 // Item Class 
@@ -180,9 +201,14 @@ function allowDrop(ev) {
     if(ev.target.className == "slot1" && ev.target.children.length == 0){
         console.log("Head");
         ev.target.appendChild(document.getElementById(data));
-        if(localItems[ev.target.firstChild.id].getType() == 0){
-            console.log(localItems[ev.target.firstChild.id].getItemID());
-            socket.emit("equip_head", localItems[ev.target.firstChild.id].getItemID());
+        if (localItems[ev.target.firstChild.id].getType() == 0) {
+            if (localItems[ev.target.firstChild.id].getRequiredLevel() <= localPlayer.getLevel()) {
+                console.log(localItems[ev.target.firstChild.id].getItemID());
+                socket.emit("equip_head", localItems[ev.target.firstChild.id].getItemID());
+            } else {
+                alert("Your Level is too low to equip that item!");
+                returnDiv.appendChild(document.getElementById(data));
+            }
         } else {
             alert("Item is not of Type Head");
             returnDiv.appendChild(document.getElementById(data));
@@ -191,9 +217,14 @@ function allowDrop(ev) {
     if(ev.target.className == "slot2" && ev.target.children.length == 0){
         console.log("Chest");
         ev.target.appendChild(document.getElementById(data));
-        if(localItems[ev.target.firstChild.id].getType() == 1){
-            console.log(localItems[ev.target.firstChild.id].getItemID());
-            socket.emit("equip_chest", localItems[ev.target.firstChild.id].getItemID());
+        if (localItems[ev.target.firstChild.id].getType() == 1) {
+            if (localItems[ev.target.firstChild.id].getRequiredLevel() <= localPlayer.getLevel()) {
+                console.log(localItems[ev.target.firstChild.id].getItemID());
+                socket.emit("equip_chest", localItems[ev.target.firstChild.id].getItemID());
+            } else {
+                alert("Your Level is too low to equip that item!");
+                returnDiv.appendChild(document.getElementById(data));
+            }
         } else {
             alert("Item is not of Type Chest");
             returnDiv.appendChild(document.getElementById(data));
@@ -202,9 +233,14 @@ function allowDrop(ev) {
     if(ev.target.className == "slot3" && ev.target.children.length == 0){
         console.log("Leg");
         ev.target.appendChild(document.getElementById(data));
-        if(localItems[ev.target.firstChild.id].getType() == 2){
-            console.log(localItems[ev.target.firstChild.id].getItemID());
-            socket.emit("equip_leg", localItems[ev.target.firstChild.id].getItemID());
+        if (localItems[ev.target.firstChild.id].getType() == 2) {
+            if (localItems[ev.target.firstChild.id].getRequiredLevel() <= localPlayer.getLevel()) {
+                console.log(localItems[ev.target.firstChild.id].getItemID());
+                socket.emit("equip_leg", localItems[ev.target.firstChild.id].getItemID());
+            } else {
+                alert("Your Level is too low to equip that item!");
+                returnDiv.appendChild(document.getElementById(data));
+            }
         } else {
             alert("Item is not of Type Legs");
             returnDiv.appendChild(document.getElementById(data));
@@ -213,9 +249,14 @@ function allowDrop(ev) {
     if(ev.target.className == "slot4" && ev.target.children.length == 0){
         console.log("Hands");
         ev.target.appendChild(document.getElementById(data));
-        if(localItems[ev.target.firstChild.id].getType() == 3){
-            console.log(localItems[ev.target.firstChild.id].getItemID());
-            socket.emit("equip_hand", localItems[ev.target.firstChild.id].getItemID());
+        if (localItems[ev.target.firstChild.id].getType() == 3) {
+            if (localItems[ev.target.firstChild.id].getRequiredLevel() <= localPlayer.getLevel()) {
+                console.log(localItems[ev.target.firstChild.id].getItemID());
+                socket.emit("equip_hand", localItems[ev.target.firstChild.id].getItemID());
+            } else {
+                alert("Your Level is too low to equip that item!");
+                returnDiv.appendChild(document.getElementById(data));
+            }
         } else {
             alert("Item is not of Type Hands");
             returnDiv.appendChild(document.getElementById(data));
@@ -224,9 +265,14 @@ function allowDrop(ev) {
     if(ev.target.className == "slot5" && ev.target.children.length == 0){
         console.log("Boots");
         ev.target.appendChild(document.getElementById(data));
-        if(localItems[ev.target.firstChild.id].getType() == 4){
-            console.log(localItems[ev.target.firstChild.id].getItemID());
-            socket.emit("equip_boot", localItems[ev.target.firstChild.id].getItemID());
+        if (localItems[ev.target.firstChild.id].getType() == 4) {
+            if (localItems[ev.target.firstChild.id].getRequiredLevel() <= localPlayer.getLevel()) {
+                console.log(localItems[ev.target.firstChild.id].getItemID());
+                socket.emit("equip_boot", localItems[ev.target.firstChild.id].getItemID());
+            } else {
+                alert("Your Level is too low to equip that item!");
+                returnDiv.appendChild(document.getElementById(data));
+            }
         } else {
             alert("Item is not of Type Boots");
             returnDiv.appendChild(document.getElementById(data));
@@ -235,9 +281,15 @@ function allowDrop(ev) {
     if(ev.target.className == "slot6" && ev.target.children.length == 0){
         console.log("Weapon");
         ev.target.appendChild(document.getElementById(data));
-        if(localItems[ev.target.firstChild.id].getType() == 5){
-            console.log(localItems[ev.target.firstChild.id].getItemID());
-            socket.emit("equip_weapon", localItems[ev.target.firstChild.id].getItemID());
+        if (localItems[ev.target.firstChild.id].getType() == 5) {
+            if (localItems[ev.target.firstChild.id].getRequiredLevel() <= localPlayer.getLevel()) {
+                console.log(localItems[ev.target.firstChild.id].getItemID());
+                socket.emit("equip_weapon", localItems[ev.target.firstChild.id].getItemID());
+
+            } else {
+                alert("Your Level is too low to equip that item!");
+                returnDiv.appendChild(document.getElementById(data));
+            }
         } else {
             alert("Item is not of Type Weapon");
             returnDiv.appendChild(document.getElementById(data));
@@ -431,6 +483,9 @@ socket.on("loginVerification", (characterId, characterName, characterLevel, char
     itemRares = itemRarities;
     console.log("Works!");
     getAccountItems();
+
+    // Defining the Player Object
+    localPlayer = new Player(characterId, characterName, characterLevel, characterClass, characterPortrait, characterAttackpower, characterHealth, characterDefense);
 })
 
 

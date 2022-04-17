@@ -180,30 +180,9 @@ table.GeneratedTable {
   table.GeneratedTable thead {
   }
 
-.marketplaceHeader {
-    height: 50px;
-}
-
-.marketplaceGrid div {
-    height: 100%;
-    width: 100%;
-}
-
-.marketplace-item-icon {
-    max-height: 150px;
-    max-width: 150px;
-}
-
-.marketplace-item {
-    color: white;
-    background-color: rgba(56, 56, 56, 0.3);
-    border: 1px solid white;
-}
-
-.marketplace-item:hover {
-    color: white;
-    background-color: rgba(56, 56, 56, 0.8);
-    border: 1px solid white;
+.MapImage {
+    height: 50%;
+    width: 50%;
 }
 
 html {
