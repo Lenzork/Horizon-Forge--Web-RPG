@@ -36,14 +36,6 @@ jobs:
       - run:
           name: npm audit fix
           command: npm audit fix
-      - run: mkdir ~/junit
-      - run:
-          command: mocha test --reporter mocha-junit-reporter
-          environment:
-            MOCHA_FILE: ~/junit/test-results.xml
-          when: always
-      - store_test_results:
-          path: ~/junit
       - run:
           name: Wait for database service on the tcp protocol
           command: dockerize -wait tcp://localhost:3306 -timeout 1m
