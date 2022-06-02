@@ -50,7 +50,8 @@ jobs:
           command: mysql -h 127.0.0.1 -u root -e "create database Antropa"
       - run:
           name: Populate Database
-          command: mysql -h 127.0.0.1 -u root Antropa < AntropaServer-HorizonForgeWebRPG.sql
+          command: mysql -h 127.0.0.1 -u root -p Antropa < AntropaServer-HorizonForgeWebRPG.sql
+          
       - run:
           name: Start Horizon Forge Gameserver
           command: node server.js
