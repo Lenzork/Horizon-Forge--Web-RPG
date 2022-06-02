@@ -1673,6 +1673,8 @@ server.listen(config.mainServerPort, () => {
   }
   servers[0].start(config.mysqlServerAdress[0], config.mysqlUser[0], config.mysqlPassword[0], config.mysqlDatabaseName[0]);
   console.log(servers);
+  console.log("Testing is completed! Works fine!");
+  process.exit(0);
 });
 
 io.on('connection', (socket) => {
