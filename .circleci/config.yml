@@ -45,9 +45,9 @@ jobs:
       - run: 
           name: Installing the mysql client package...
           command: sudo apt-get install mysql-client
-      - run:
-          name: Create Database
-          command: mysql -h 127.0.0.1 -u root -e "create database Antropa"
+      #- run:
+      #    name: Create Database
+      #    command: mysql -h 127.0.0.1 -u root -e "create database Antropa"
       - run:
           name: Populate Database
           command: mysql -h 127.0.0.1 -u root -e "source AntropaServer-HorizonForgeWebRPG.sql;"
