@@ -30,7 +30,6 @@ jobs:
       - node/install-packages:
           # If you are using yarn, change the line below from "npm" to "yarn"
           pkg-manager: npm
-      - checkout
       - run: mkdir ~/junit
       - run:
           command: mocha test --reporter mocha-junit-reporter
