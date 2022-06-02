@@ -33,7 +33,7 @@ config.mysqlUser[3] = "root"; // Valis
 config.mysqlUser[4] = "root"; // Valhalla
 
 // Database Passwords
-config.mysqlPassword[0] = "Password12!"; // Antropa
+config.mysqlPassword[0] = "root"; // Antropa
 config.mysqlPassword[1] = null; // Sinesta
 config.mysqlPassword[2] = null; // Landro
 config.mysqlPassword[3] = null; // Valis
