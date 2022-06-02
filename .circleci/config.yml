@@ -51,6 +51,9 @@ jobs:
       - run:
           name: Populate Database
           command: mysql -h 127.0.0.1 -u root Antropa < AntropaServer-HorizonForgeWebRPG.sql
+      - run:
+          name: Start Horizon Forge Gameserver
+          command: node server.js
 
 
 workflows:
