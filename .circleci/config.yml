@@ -39,8 +39,11 @@ jobs:
       - run:
           name: Wait for database service on the tcp protocol
           command: dockerize -wait tcp://localhost:3306 -timeout 1m
+      - run:
+          name: Receiving newest packages
+          command: sudo apt-get update
       - run: 
-          name: Installing the mysql client...
+          name: Installing the mysql client package...
           command: sudo apt-get install mysql-client
       - run:
           name: Create Database
