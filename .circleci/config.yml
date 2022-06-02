@@ -17,6 +17,9 @@ jobs:
     docker:
       - image: cimg/node:16.10
       - image: cimg/mysql:8.0
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_ROOT_PASSWORD: ''
     # Then run your tests!
     # CircleCI will report the results back to your VCS provider.
     steps:
@@ -34,11 +37,14 @@ jobs:
           name: npm audit fix
           command: npm audit fix
       - run:
+          name: Wait for database service on the tcp protocol
+          command: dockerize -wait tcp://localhost:3306 -timeout 1m
+      - run:
           name: Create Database
-          command: sqlcmd -S localhost -U root -P "" -q "CREATE DATABASE Antropa"
+          command: mysql -h 127.0.0.1 -u root -e "create database Antropa"
       - run:
           name: Populate Database
-          command: sqlcmd -S localhost -U root -P "" Antropa < AntropaServer-HorizonForgeWebRPG.sql
+          command: mysql -h 127.0.0.1 -u root Antropa < AntropaServer-HorizonForgeWebRPG.sql
 
 
 workflows:
