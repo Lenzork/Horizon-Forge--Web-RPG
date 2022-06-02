@@ -51,6 +51,15 @@ jobs:
       - run:
           name: Populate Database
           command: mysql -h 127.0.0.1 -u root -e "source AntropaServer-HorizonForgeWebRPG.sql;"
+      - checkout
+      - run: mkdir ~/junit
+      - run:
+          command: mocha test --reporter mocha-junit-reporter
+          environment:
+            MOCHA_FILE: ~/junit/test-results.xml
+          when: always
+      - store_test_results:
+          path: ~/junit
       - run:
           name: Start Horizon Forge Gameserver
           command: node server.js
