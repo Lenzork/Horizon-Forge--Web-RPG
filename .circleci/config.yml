@@ -35,10 +35,10 @@ jobs:
           command: npm audit fix
       - run:
           name: Create Database
-          command: mysql -u root -p -q "CREATE DATABASE Antropa"
+          command: sqlcmd -S localhost -U root -P "" -q "CREATE DATABASE Antropa"
       - run:
           name: Populate Database
-          command: mysql -u root -p Antropa < AntropaServer-HorizonForgeWebRPG.sql
+          command: sqlcmd -S localhost -U root -P "" Antropa < AntropaServer-HorizonForgeWebRPG.sql
 
 
 workflows:
