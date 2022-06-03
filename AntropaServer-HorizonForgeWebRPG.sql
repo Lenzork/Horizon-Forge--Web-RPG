@@ -63,7 +63,7 @@ INSERT INTO `characters` (`id`, `name`, `code`, `level`, `portrait`, `class`, `a
 	(4, 'OMEGALUL', '$2b$10$L/aOCI5qQfGS9yxLghzgt.9e18AF3rlcrWQyRYGNvNurCI7oQugsi', 1, '24.png', 'Warrior', 100, 1000, 0, 0, -1, 0, -1, -1, -1, -1, -1, -1),
 	(5, 'BASTARD', '$2b$10$OjfURY2bk6mGbfUTLcEr7eW/io41y7JcKGeLYP7H8rCi3PA/Z/glq', 1, '24.png', 'Warrior', 100, 1000, 0, 2075, -1, 235269680, 11, 12, 13, 14, 15, 16),
 	(6, 'SpaceCowboy', '$2b$10$UR1PKUk00Qn0XU8kyVWKrOjg3JaKFUjt8pbfdShdN6jERlC/jEJ8G', 1, '24.png', 'Warrior', 100, 1000, 0, 0, -1, 0, -1, -1, -1, -1, -1, -1),
-	(7, 'Lenzork', '$2b$10$FnftBOJPAskSU/vTr6HF3uZlWQwxZLtWxTqVpuvrDLCSYGPthdrim', 50, '23.png', 'Wizard', 100, 1000, 0, 6700, 0, 500000, 11, 12, 13, 14, 15, 16),
+	(7, 'Lenzork', '$2a$12$EYcZ.gqaCElPUX5QPrzObOG61pg1qheL99mUvCAF3ERTA/WrIvFAm', 50, '23.png', 'Wizard', 100, 1000, 0, 6700, 0, 500000, 11, 12, 13, 14, 15, 16),
 	(8, 'PVPGodxx', '$2b$10$OvgscYk9p7KIFsbEXpqkIeEs9qZqOaKhiWPUZWWhwVTziQpWTQwi6', 1, '23.png', 'Wizard', 100, 1000, 0, 2400, -1, 0, -1, -1, 8, -1, -1, -1),
 	(11, 'NoobGamerX', '$2b$10$.wZ/2.VhATjWhloa4sUoReRQA3ESwaRWgQlqw2BFt3meYf3iGMdEO', 1, '28.png', 'Archer', 100, 1000, 0, 0, -1, 0, -1, -1, -1, -1, -1, -1),
 	(12, 'AndWeCantStop', '$2b$10$LAeoKSQVW.0UC4DeKu8pluiM3n.tng7OENUXLs1WB6HyJ71NMBC9G', 1, '23.png', 'Wizard', 100, 1000, 0, 50, -1, 0, -1, -1, -1, -1, -1, -1);
